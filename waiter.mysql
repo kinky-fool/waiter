@@ -1,0 +1,70 @@
+drop table if exists members;
+drop table if exists recipes;
+drop table if exists sessions;
+drop table if exists votes;
+drop table if exists messages;
+
+create table members (
+    userid          int unsigned not null auto_increment,
+    user_key        varchar(16) not null,
+    username        varchar(32) not null,
+    password        varchar(32) not null,
+    email           varchar(64) not null default 'unset',
+    verified        boolean not null default 0,
+    show_time       boolean not null default 1,
+    about_me        varchar(512),
+    primary key (userid)
+);
+
+create table recipes (
+    recipeid        int unsigned not null auto_increment,
+    recipe_name     varchar(64),
+    recipe_key      varchar(16) not null,
+    ownerid         int unsigned not null,
+    min_time        int unsigned not null,
+    max_time        int unsigned not null,
+    start_time      int unsigned not null,
+    start_rand      tinyint not null default 0,
+    votes_needed    tinyint unsigned not null,
+    vote_addtime    int unsigned not null,
+    vote_subtime    int unsigned not null,
+    show_time_pass  boolean not null default 1,
+    show_time_left  tinyint not null default 1,
+    safeword        varchar(128),
+    primary key (recipeid)
+);
+
+create table sessions (
+    sessionid       int unsigned not null auto_increment,
+    session_key     varchar(16) not null,
+    recipeid        int unsigned not null,
+    holderid        int unsigned not null,
+    wearerid        int unsigned not null,
+    finished        boolean not null default 0,
+    start_time      int unsigned not null,
+    end_time        int unsigned not null,
+    min_time        int unsigned not null,
+    max_time        int unsigned not null,
+    votes_cast      tinyint unsigned not null default 0,
+    vote_addtime    int not null,
+    vote_subtime    int not null,
+    primary key (sessionid)
+);
+
+create table votes (
+    voteid          int unsigned not null auto_increment,
+    sessionid       int unsigned not null,
+    ip              varchar(16) not null,
+    time            int unsigned not null,
+    vote            int not null,
+    primary key (voteid)
+);
+
+create table messages (
+    messageid       int unsigned not null auto_increment,
+    to_id           int unsigned not null,
+    from_id         int unsigned not null,
+    time            int unsigned not null,
+    message         text,
+    primary key (messageid)
+);
