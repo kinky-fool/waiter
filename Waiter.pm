@@ -14,7 +14,8 @@ my $db_host = 'localhost';
 
 sub db_connect {
     my $dsn = "dbi:mysql:database=$db_name;host=$db_host";
-    my $dbh = DBI->connect($dsn,$db_user,$db_pass,{ RaiseError => 1 });
+    my $dbh = DBI->connect($dsn,$db_user,$db_pass,{ RaiseError => 1 })
+                or die "Failed to connect to database: $DBI::errstr";
     return $dbh;
 }
 
@@ -70,5 +71,5 @@ sub make_user {
 }
 
 
-
-return 1;
+1;
+__END__
