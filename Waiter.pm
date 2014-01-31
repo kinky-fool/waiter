@@ -102,6 +102,39 @@ sub make_recipe {
     return;
 }
 
+sub alter_time {
+    # Adjust the remaining time of a session
+    my $sessionid   = shift;
+    my $adjustment  = shift;
+
+    my $sql = qq{ update sessions set end_time = end_time + ?
+                        where sessionid = ? };
+    my $dbh = db_connect();
+    my $sth = $dbh->prepare($sql);
+    my $rv = $sth->execute($adjustment, $sessionid);
+    $sth->finish();
+    $dbh->disconnect();
+
+    # Return 1 if the time warp was successful
+    return 1 if ($rv > 0);
+    return;
+}
+
+sub get_end_time {
+    # Return the end time for a selected session
+    my $sessionid   = shift;
+
+    my $sql = qq{ select end_time from sessions where sessionid = ? };
+    my $dbh = db_connect();
+    my $sth = $dbh->prepare($sql);
+    $sth->execute($sessionid);
+    my ($time) = $sth->fetchrow_array();
+    if ($time > 0) {
+        return $time;
+    }
+    return;
+}
+
 sub make_key {
     # Generate a random / unique alphanumeric key for sharing
     my $table   = shift;
