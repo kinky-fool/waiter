@@ -70,6 +70,32 @@ sub make_user {
     return;
 }
 
+sub make_key {
+    # Generate a random / unique alphanumeric key for sharing
+    my $table   = shift;
+    my $keyname = shift;
+
+    my @alphabet = ('A'..'Z', 'a'..'z', 0..9);
+
+    my $sql = qq{ select $keyname from $table where $keyname = ? };
+    my $dbh = db_connect();
+    my $sth = $dbh->prepare($sql);
+
+    my $key = '';
+    while ($key -eq '') {
+        for (1..16) {
+            $key .= $alphabet[rand(@alphabet)];
+        }
+        $sth->execute($key);
+        my ($used) = $sth->fetchrow_array();
+        if ($used) {
+            $key = '';
+        }
+    }
+    $sth->finish();
+    $dbh->disconnect();
+    return $key;
+}
 
 1;
 __END__
