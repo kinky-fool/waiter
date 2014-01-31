@@ -96,7 +96,12 @@ sub make_recipe {
                     $min_votes, $vote_times, $time_past, $time_left);
     $sth->finish();
     $dbh->disconnect();
+
+    # Return 1 if the insert / create was a success
+    return 1 if ($rv > 0);
+    return;
 }
+
 sub make_key {
     # Generate a random / unique alphanumeric key for sharing
     my $table   = shift;
