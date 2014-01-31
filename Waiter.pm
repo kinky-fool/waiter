@@ -70,6 +70,33 @@ sub make_user {
     return;
 }
 
+sub make_recipe {
+    # Create a waiting recipe
+    my $ownerid     = shift;
+    my $name        = shift;
+    my $min_time    = shift;
+    my $max_time    = shift;
+    my $start_time  = shift;
+    my $start_rand  = shift;
+    my $min_votes   = shift;
+    my $vote_times  = shift;
+    my $time_past   = shift;
+    my $time_left   = shift;
+
+    my $recipe_key = make_key('recipes','recipe_key');
+
+    my $dbh = db_connect();
+    my $sql = qq{ insert into recipes (ownerid, recipe_key, name,
+                    min_time, max_time, start_time, start_rand,
+                    min_votes, vote_times, time_past, time_left)
+                    values (?,?,?,?,?,?,?,?,?,?,?) };
+    my $sth = $dbh->prepare($sql);
+    my $rv = $sth->execute($ownerid, $recipe_key, $name,
+                    $min_time, $max_time, $start_time, $start_rand,
+                    $min_votes, $vote_times, $time_past, $time_left);
+    $sth->finish();
+    $dbh->disconnect();
+}
 sub make_key {
     # Generate a random / unique alphanumeric key for sharing
     my $table   = shift;
