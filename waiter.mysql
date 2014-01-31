@@ -18,19 +18,17 @@ create table members (
 
 create table recipes (
     recipeid        int unsigned not null auto_increment,
-    recipe_name     varchar(64),
-    recipe_key      varchar(16) not null,
     ownerid         int unsigned not null,
+    recipe_key      varchar(16) not null,
+    name            varchar(64),
     min_time        int unsigned not null,
     max_time        int unsigned not null,
     start_time      int unsigned not null,
     start_rand      tinyint not null default 0,
-    votes_needed    tinyint unsigned not null,
-    vote_addtime    int unsigned not null,
-    vote_subtime    int unsigned not null,
-    show_time_pass  boolean not null default 1,
-    show_time_left  tinyint not null default 1,
-    safeword        varchar(128),
+    min_votes       tinyint unsigned not null,
+    vote_times      varchar(24);
+    time_past       boolean not null default 1,
+    time_left       tinyint not null default 1,
     primary key (recipeid)
 );
 
@@ -48,6 +46,7 @@ create table sessions (
     votes_cast      tinyint unsigned not null default 0,
     vote_addtime    int not null,
     vote_subtime    int not null,
+    safeword        varchar(128),
     primary key (sessionid)
 );
 
