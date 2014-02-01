@@ -26,7 +26,8 @@ create table recipes (
     start_time      int unsigned not null,
     start_rand      tinyint not null default 0,
     min_votes       tinyint unsigned not null,
-    vote_times      varchar(24);
+    vote_times      varchar(24),
+    vote_cooldown   tinyint unsigned not null,
     time_past       boolean not null default 1,
     time_left       tinyint not null default 1,
     primary key (recipeid)
@@ -41,11 +42,6 @@ create table sessions (
     finished        boolean not null default 0,
     start_time      int unsigned not null,
     end_time        int unsigned not null,
-    min_time        int unsigned not null,
-    max_time        int unsigned not null,
-    votes_cast      tinyint unsigned not null default 0,
-    vote_addtime    int not null,
-    vote_subtime    int not null,
     safeword        varchar(128),
     primary key (sessionid)
 );
@@ -56,6 +52,7 @@ create table votes (
     ip              varchar(16) not null,
     time            int unsigned not null,
     vote            int not null,
+    voter_name      varchar(64),
     primary key (voteid)
 );
 
