@@ -76,5 +76,29 @@ sub save_session {
     $session->flush();
 }
 
+sub page_header {
+    my $title = shift;
+    my $extraheaders = shift;
+    $extraheaders = "" unless ($extraheaders);
+
+    print <<ENDL;
+Content-Type: text/html; charset=ISO-8859-1
+Cache-Control: no-cache, no-store, must-revalidate
+$extraheaders
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0;">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <title>$title</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+    <style type="text/css">\@import "style.css";</style>
+  </head>
+  <body>
+ENDL
+}
+
 1;
 __END__
