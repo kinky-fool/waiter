@@ -159,15 +159,29 @@ sub get_end_time {
     # Return the end time for a selected session
     my $sessionid   = shift;
 
-    my $sql = qq{ select end_time from sessions where sessionid = ? };
     my $dbh = db_connect();
+    my $sql = qq{ select start_time,end_time,recipeid from sessions
+                    where sessionid = ? };
     my $sth = $dbh->prepare($sql);
     $sth->execute($sessionid);
-    my ($time) = $sth->fetchrow_array();
-    if ($time > 0) {
-        return $time;
+    my ($start_time,$end_time,$recipeid) = $sth->fetchrow_array();
+    $sth->finish();
+
+    $sql = qq{ select max_time from recipes where recipeid = ? };
+    $sth = $dbh->prepare($sql);
+    $sth->execute($recipeid);
+    my ($max_time) = $sth->fetchrow_array();
+    $sth->finish();
+    $dbh->disconnect();
+
+    my $maximum = $start_time + $max_time;
+    if ($end_time > $maximum) {
+        $end_time = $maximum;
     }
-    return;
+    if ($end_time > 0) {
+        return $end_time;
+    }
+    return 0;
 }
 
 sub make_key {
