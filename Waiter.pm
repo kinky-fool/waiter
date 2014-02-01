@@ -19,25 +19,55 @@ sub db_connect {
     return $dbh;
 }
 
-sub auth_user {
-    # Authenticate a user login
+sub logger {
+    # TODO
+    my $message = shift;
+
+    return;
+}
+
+sub make_hash {
+    # Psuedo authentication; return a hash
+    # If the right password is provided, the right hash will be returned
     my $user    = shift;
     my $pass    = shift;
 
-    my $dbh = db_connect();
-    my $userq = $dbh->quote("$user");
-    my $select = qq{ select password from users where username = $userq };
-    my ($hash) = $dbh->selectrow_array($select);
-    $dbh->disconnect;
-    if ($hash and ($hash ne '')) {
-        if (crypt($pass,$hash) eq $hash) {
-            return 1;
-        } else {
-            logger("Login failed for '$user'; invalid password");
-            return;
-        }
+    my $hash = get_hash($user);
+    if ($hash and (crypt($pass,$hash) eq $hash)) {
+        return $hash;
     }
-    logger("Login failed for '$user'; unknown user");
+    # Return something that looks like a hash, but is incorrect
+    return crypt($pass,$user);
+}
+
+sub get_hash {
+    # Return the stored hash for a user
+    my $user    = shift;
+
+    my $sql = qq{ select password from members where username = ? };
+    my $dbh = db_connect();
+    my $sth = $dbh->prepare($sql);
+    $sth->execute($user);
+    my ($hash) = $sth->fetchrow_array();
+    $sth->finish();
+    $dbh->disconnect();
+    if ($hash and $hash ne '') {
+        return $hash;
+    }
+    return;
+}
+
+sub auth_user {
+    # Authenticate a user login
+    my $user    = shift;
+    my $hash    = shift;
+
+    my $correct = get_hash($user);
+    if ($hash and ($hash eq $correct)) {
+        return 1;
+    }
+
+    logger("Login failed for '$user'; invalid password");
     return;
 }
 
