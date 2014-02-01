@@ -9,7 +9,7 @@ package Waiter;
 
 my $db_user = 'waiter';
 my $db_pass = 'patience';
-my $db_name = 'waiting-game';
+my $db_name = 'waiting_game';
 my $db_host = 'localhost';
 
 sub db_connect {
@@ -147,7 +147,7 @@ sub make_key {
     my $sth = $dbh->prepare($sql);
 
     my $key = '';
-    while ($key -eq '') {
+    while ($key eq '') {
         for (1..16) {
             $key .= $alphabet[rand(@alphabet)];
         }

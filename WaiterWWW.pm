@@ -55,12 +55,12 @@ sub read_session {
 
     my %data = ();
     # Read session parameters
-    foreach my $key ($session->params()) {
+    foreach my $key ($session->param()) {
         $data{$key} = $session->param($key);
     }
     # Read CGI parameters
-    foreach my $key (params()) {
-        $data{$key} = param($key);
+    foreach my $key (CGI::param()) {
+        $data{$key} = CGI::param($key);
     }
     return \%data;
 }
