@@ -20,7 +20,7 @@ if ($session->is_expired) {
 } elsif ($session->is_empty) {
     if ($$data{action} and ($$data{action} eq 'login')) {
         delete $$data{action};
-        if (Waiter::WWW::auth_user($$data{username},$$data{hash})) {
+        if (Waiter::auth_user($$data{username},$$data{hash})) {
             Waiter::WWW::save_session($session, $data);
             Waiter::WWW::login($session);
         } else {
@@ -29,12 +29,44 @@ if ($session->is_expired) {
     } else {
         login_page();
     }
-} elsif (Waiter::WWW::auth_user($$data{username},$$data{hash})) {
+} elsif (Waiter::auth_user($$data{username},$$data{hash})) {
     Waiter::WWW::save_session($session, $data);
     Waiter::WWW::login($session);
 } else {
-    login_page('Invalid Session.');
+    Waiter::WWW::logout($session);
 }
 
 Waiter::WWW::save_session($session, $data);
 exit;
+
+sub login_page {
+    my $error = shift || '';
+    $error = "<p><em>$error</em></p>" if ($error ne '');
+
+    Waiter::WWW::page_header('The Waiting Game Login Page','');
+    print qq{
+    <div id='container'>
+        <form method='post'>
+            <h4>The Waiting Game Login Page</h4>
+            <table id='login'>
+                <tr>
+                    <td>username:</td>
+                    <td><input type='text' name='username' size='15' /></td>
+                </tr><tr>
+                    <td>password:</td>
+                    <td><input type='password' name='password' size='15'/></td>
+                </tr><tr>
+                    <td></td>
+                    <td style='text-align: right; font-size: 6pt;'>
+                        <a href='signup.pl'>sign up</a>
+                    </td>
+                </tr>
+            </table>
+            <input type='submit' name='action' value='login' />
+        </form>
+        <br/>
+        $error
+    </div>
+    </body>
+</html>};
+}
