@@ -4,6 +4,8 @@ use strict;
 use warnings;
 
 use DBI;
+use gmtime;
+use POSIX qw(strftime);
 
 package Waiter;
 
@@ -180,6 +182,66 @@ sub get_end_time {
     }
     if ($end_time > 0) {
         return $end_time;
+    }
+    return 0;
+}
+
+sub convert_seconds {
+    # Convert seconds to weeks, days, hours, minutes, seconds
+    my $seconds = shift;
+
+    if ($seconds > 0) {
+        my ($days,$hours,$minutes,$seconds) = (gmtime($seconds))[7,2,1,0];
+        my $weeks = int($days / 7);
+        $days = $days - ($weeks * 7);
+        return ($weeks,$days,$hours,$minutes,$seconds);
+    }
+    return;
+}
+
+sub time_remaining {
+    # Return time left on a session's clock in a format like:
+    # 1 week, 4 days, 10 hours, 3 minutes and 43 seconds
+    my $session = shift;
+
+    my $end_time = get_end_time($session);
+    my $seconds = $end_time - time;
+    if ($seconds > 0) {
+        my ($weeks,$days,$hours,$minutes,$seconds) = convert_seconds($seconds);
+
+        my $output = '';
+        if ($weeks > 0) {
+            $output = sprintf("%d %s, %d %s, %d %s, %d %s and %d %s",
+            $weeks, ($weeks == 1)?"week":"weeks",
+            $days, ($days == 1)?"day":"days",
+            $hours, ($hours == 1)?"hour":"hours",
+            $minutes, ($minutes==1)?"minute":"minutes",
+            $seconds, ($seconds==1)?"second":"seconds");
+            return $output;
+        }
+        if ($days > 0) {
+            $output = sprintf("%d %s, %d %s, %d %s and %d %s",
+            $days, ($days == 1)?"day":"days",
+            $hours, ($hours == 1)?"hour":"hours",
+            $minutes, ($minutes==1)?"minute":"minutes",
+            $seconds, ($seconds==1)?"second":"seconds");
+            return $output;
+        }
+        if ($hours > 0) {
+            $output = sprintf("%d %s, %d %s and %d %s",
+            $hours, ($hours == 1)?"hour":"hours",
+            $minutes, ($minutes==1)?"minute":"minutes",
+            $seconds, ($seconds==1)?"second":"seconds");
+            return $output;
+        }
+        if ($minutes > 0) {
+            $output = sprintf("%d %s and %d %s",
+            $minutes, ($minutes==1)?"minute":"minutes",
+            $seconds, ($seconds==1)?"second":"seconds");
+            return $output;
+        }
+        $output = sprintf("%d %s", $seconds, ($seconds==1)?"second":"seconds");
+        return $output;
     }
     return 0;
 }
