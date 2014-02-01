@@ -76,23 +76,28 @@ sub make_user {
     my $user    = shift;
     my $pass    = shift;
 
+    my $sql = qq { select userid from members where username = ? };
     my $dbh = db_connect();
-    my $userq = $dbh->quote("$user");
-    my $select = qq{ select userid from users where username = $userq };
-    my ($uid) = $dbh->selectrow_array($select);
+    my $sth = $dbh->prepare($sql);
+    $sth->execute($user);
+    my ($uid) = $sth->fetchrow_array();
+    $sth->finish();
+
     if ($uid) {
         logger("Account creation failed: '$user' already exists");
         $dbh->disconnect;
         return;
     }
+
     my $salt = join '',('.','.',0..9,'A'..'Z','a'..'z')[rand 64, rand 64];
-    my $crypt = crypt($pass,$salt);
-    my $cryptq = $dbh->quote($crypt);
-    my $insert = qq{ insert into users (username,password)
-                        values ($userq,$cryptq) };
-    my $rv = $dbh->do($insert);
-    $dbh->disconnect;
-    if ($rv) {
+    my $hash = crypt($pass,$salt);
+
+    $sql = qq{ insert into members (username,password) values (?, ?) };
+    $sth = $dbh->prepare($sql);
+    my $rv = $sth->execute($user,$hash);
+    $sth->finish();
+    $dbh->disconnect();
+    if ($rv > 0) {
         logger("Account creation success: '$user' created");
         return 1;
     }
