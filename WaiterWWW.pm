@@ -30,6 +30,16 @@ sub login {
     );
 }
 
+sub logout {
+    my $session = shift;
+
+    $session->delete();
+    $session->flush();
+    print $session->header(
+        -location   => 'index.pl'
+    );
+}
+
 sub load_session {
     # Read session information and return the information as a hashref
     my $sess_name = shift;
