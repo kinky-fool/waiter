@@ -49,7 +49,7 @@ sub load_session {
     return $session;
 }
 
-sub read_session {
+sub read_params {
     # Read session information and return the information as a hashref
     my $session = shift;
 
@@ -62,6 +62,11 @@ sub read_session {
     foreach my $key (CGI::param()) {
         $data{$key} = CGI::param($key);
     }
+    # Attempt to replace 'password' with 'hash'
+    if ($data{username} and $data{password}) {
+        $data{hash} = Waiter::make_hash($data{username},$data{password});
+        delete $data{password};
+    }
     return \%data;
 }
 
@@ -70,9 +75,16 @@ sub save_session {
     my $session = shift;
     my $data    = shift;
 
-    foreach my $key (keys %$data) {
-        $session->param($key,$$data{$key});
+    # Clear the params
+    $session->clear();
+    if ($$data{username} and ($$data{username} ne '')) {
+        $session->param('username', $$data{username});
     }
+    if ($$data{hash} and ($$data{hash} ne '')) {
+        $session->param('hash', $$data{hash});
+    }
+    $session->expire('~logged-in', '30m');
+
     $session->flush();
 }
 
