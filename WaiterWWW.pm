@@ -89,14 +89,16 @@ sub save_session {
 }
 
 sub page_header {
-    my $title = shift;
-    my $extraheaders = shift;
-    $extraheaders = "" unless ($extraheaders);
+    my $title   = shift;
+    my $logout  = shift || 0;
 
+    my $logout_link = '';
+    if ($logout) {
+        $logout_link = "<p id='logout'><a href='logout.pl'>logout</a></p>";
+    }
     print <<ENDL;
 Content-Type: text/html; charset=ISO-8859-1
 Cache-Control: no-cache, no-store, must-revalidate
-$extraheaders
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
@@ -109,7 +111,22 @@ $extraheaders
     <style type="text/css">\@import "style.css";</style>
   </head>
   <body>
+  <div id='container'>
+    $logout_link
+    <h4>$title</h4>
 ENDL
+}
+
+sub page_footer {
+    my $error   = shift || '';
+    $error = "<p><em>$error</em></p>" if ($error ne '');
+
+    print qq{
+    $error
+  </div>
+  </body>
+</html>
+};
 }
 
 1;
