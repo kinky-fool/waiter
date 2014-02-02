@@ -248,5 +248,28 @@ sub vote_options {
     return $html;
 }
 
+sub information_html {
+    # Produce a block of HTML that shows a users' basic information
+    my $user    = shift;
+
+    my $userid = Waiter::get_userid($user);
+    my $information = '';
+    if (my $session = Waiter::is_waiting($userid)) {
+        $information = "<h3>In a Session</h3>";
+    } else {
+        $information = "<h3>Not in a Session</h3>";
+    }
+    return $information;
+}
+
+sub messages_html {
+    # Produce a block of HTML to display messages for a user
+    my $user    = shift;
+
+    my $userid = Waiter::get_userid($user);
+    my $messages = '';
+    return $messages;
+}
+
 1;
 __END__
