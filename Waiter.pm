@@ -176,6 +176,24 @@ sub is_recipe_owner {
     return;
 }
 
+sub create_new_recipe {
+    # Create a new default recipe for $userid
+    my $userid  = shift;
+    my $recipe_key = make_key('recipes','recipe_key');
+
+    my $sql = qq{ insert into recipes (ownerid, name, recipe_key)
+                    values (?, ?, ?) };
+    my $dbh = db_connect();
+    my $sth = $dbh->prepare($sql);
+    my $rv = $sth->execute($userid,$recipe_key,$recipe_key);
+    $sth->finish();
+    $dbh->disconnect();
+    if ($rv > 0) {
+        return $recipe_key;
+    }
+    return;
+}
+
 sub make_recipe {
     # Create a waiting recipe
     my $ownerid     = shift;
