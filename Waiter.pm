@@ -4,7 +4,6 @@ use strict;
 use warnings;
 
 use DBI;
-use gmtime;
 use POSIX qw(strftime);
 
 package Waiter;
@@ -46,14 +45,14 @@ sub get_hash {
     # Return the stored hash for a user
     my $user    = shift;
 
-    my $sql = qq{ select password from members where username = ? };
+    my $sql = qq{ select password from users where username = ? };
     my $dbh = db_connect();
     my $sth = $dbh->prepare($sql);
     $sth->execute($user);
     my ($hash) = $sth->fetchrow_array();
     $sth->finish();
     $dbh->disconnect();
-    if ($hash and $hash ne '') {
+    if ($hash and ($hash ne '')) {
         return $hash;
     }
     return;
@@ -78,7 +77,7 @@ sub make_user {
     my $user    = shift;
     my $pass    = shift;
 
-    my $sql = qq { select userid from members where username = ? };
+    my $sql = qq { select userid from users where username = ? };
     my $dbh = db_connect();
     my $sth = $dbh->prepare($sql);
     $sth->execute($user);
@@ -94,7 +93,7 @@ sub make_user {
     my $salt = join '',('.','.',0..9,'A'..'Z','a'..'z')[rand 64, rand 64];
     my $hash = crypt($pass,$salt);
 
-    $sql = qq{ insert into members (username,password) values (?, ?) };
+    $sql = qq{ insert into users (username,password) values (?, ?) };
     $sth = $dbh->prepare($sql);
     my $rv = $sth->execute($user,$hash);
     $sth->finish();
