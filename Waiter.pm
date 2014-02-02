@@ -72,6 +72,58 @@ sub auth_user {
     return;
 }
 
+sub get_userid {
+    # Return a user's userid using a username
+    my $user    = shift;
+
+    my $sql = qq{ select userid from users where username = ? };
+    my $dbh = db_connect();
+    my $sth = $dbh->prepare($sql);
+    $sth->execute($user);
+    my ($userid) = $sth->fetchrow_array();
+    $sth->finish();
+    $dbh->disconnect();
+    if ($userid and ($userid ne '')) {
+        return $userid;
+    }
+    return;
+}
+
+sub is_waiting {
+    # Return sessionid if a user is currently in a session
+    my $userid  = shift;
+
+    my $sql = qq{ select sessionid from sessions where
+                        finished = 0 and wearerid = ? };
+    my $dbh = db_connect();
+    my $sth = $dbh->prepare($sql);
+    $sth->execute($userid);
+    my ($sid) = $sth->fetchrow_array();
+    $sth->finish();
+    $dbh->disconnect();
+    if ($sid and ($sid ne '')) {
+        return $sid;
+    }
+    return;
+}
+
+sub get_recipe_by_key {
+    # Return a hashref of the recipe settings, if found
+    my $recipe_key  = shift;
+
+    my $sql = qq{ select * from recipes where recipe_key = ? };
+    my $dbh = db_connect();
+    my $sth = $dbh->prepare($sql);
+    $sth->execute($recipe_key);
+    my $recipe = $sth->fetchrow_hashref();
+    $sth->finish();
+    $dbh->disconnect();
+    if ($recipe) {
+        return $recipe;
+    }
+    return;
+}
+
 sub make_user {
     # Create / store user information in the database
     my $user    = shift;
@@ -103,6 +155,24 @@ sub make_user {
         return 1;
     }
     logger("Account creation failed: '$user' DB insert failed");
+    return;
+}
+
+sub is_recipe_owner {
+    # Verify that a user owns the recipe
+    my $userid  = shift;
+    my $recipe  = shift;
+
+    my $sql = qq{ select ownerid from recipes where recipe_key = ? };
+    my $dbh = db_connect();
+    my $sth = $dbh->prepare($sql);
+    $sth->execute($recipe);
+    my ($owner) = $sth->fetchrow_array();
+    $sth->finish();
+    $dbh->disconnect();
+    if ($owner eq $userid) {
+        return 1;
+    }
     return;
 }
 
