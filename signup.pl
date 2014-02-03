@@ -38,7 +38,7 @@ sub sign_up_page {
     my $error   = shift || '';
 
     Waiter::WWW::page_header('Sign Up to Wait!',0);
-    print qq{
+    print qq|
     <form method='post'>
       <table id='sign_up'>
         <tr>
@@ -61,6 +61,6 @@ sub sign_up_page {
       <br/>
       <input type='submit' name='action' value='create' />
     </form>
-};
+|;
     Waiter::WWW::page_footer($error);
 }

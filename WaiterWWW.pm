@@ -121,12 +121,12 @@ sub page_footer {
     my $error   = shift || '';
     $error = "<p><em>$error</em></p>" if ($error ne '');
 
-    print qq{
+    print qq|
     $error
   </div>
   </body>
 </html>
-};
+|;
 }
 
 sub time_dropdown {
@@ -137,7 +137,7 @@ sub time_dropdown {
 
     my ($weeks,$days,$hours) = Waiter::convert_seconds($seconds);
 
-    my $html = qq{
+    my $html = qq|
       <tr valign='center'>
         <td align='left' colspan='2'>$caption</td>
         <td>&nbsp;</td>
@@ -145,37 +145,37 @@ sub time_dropdown {
       <tr valign='center'>
         <td align='left'>
           <select name='weeks_$type'>
-};
+|;
     for my $i (0 .. 52) {
         my $selected = '';
         $selected = ' selected' if ($i == $weeks);
         $html .= sprintf("            <option value='%d'%s>%d %s</option>\n",
                 $i,$selected,$i,($i == 1)?'Week':'Weeks');
     }
-    $html .= qq{          </select>
+    $html .= qq|          </select>
         </td><td align='center'>
           <select name='days_$type'>
-};
+|;
     for my $i (0 .. 6) {
         my $selected = '';
         $selected = ' selected' if ($i == $days);
         $html .= sprintf("            <option value='%d'%s>%d %s</option>\n",
                 $i,$selected,$i,($i == 1)?'Day':'Days');
     }
-    $html .= qq{          </select>
+    $html .= qq|          </select>
         </td><td align='right'>
           <select name='hours_$type'>
-};
+|;
     for my $i (0 .. 23) {
         my $selected = '';
         $selected = ' selected' if ($i == $hours);
         $html .= sprintf("            <option value='%d'%s>%d %s</option>\n",
                 $i,$selected,$i,($i == 1)?'Hour':'Hours');
     }
-    $html .= qq{          </select>
+    $html .= qq|          </select>
         </td>
       </tr>
-};
+|;
     return $html;
 }
 
@@ -194,15 +194,15 @@ sub time_checkboxes {
             }
         }
     }
-    my $html = qq{
+    my $html = qq|
       <tr valign='center'>
         <td align='left'>Decrease</td>
         <td>&nbsp;</td>
         <td align='right'>Increase</td>
       </tr>
-};
+|;
     foreach my $time (1,2,4,8,12) {
-        $html .= qq{
+        $html .= qq|
       <tr valign='center'>
         <td align='left'>
           <input type='checkbox' name='sub_$time' $subs{$time} />
@@ -214,7 +214,7 @@ sub time_checkboxes {
           <input type='checkbox' name='add_$time' $adds{$time} />
         </td>
       </tr>
-};
+|;
     }
     return $html;
 }
@@ -223,7 +223,7 @@ sub vote_options {
     my $min         = shift;
     my $cooldown    = shift;
 
-    my $html = qq{
+    my $html = qq|
       <tr valign='center'>
         <td align='left'>Required Votes</td>
         <td align='right'>Vote Cooldown</td>

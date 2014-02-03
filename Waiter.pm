@@ -45,7 +45,7 @@ sub get_hash {
     # Return the stored hash for a user
     my $user    = shift;
 
-    my $sql = qq{ select password from users where username = ? };
+    my $sql = qq| select password from users where username = ? |;
     my $dbh = db_connect();
     my $sth = $dbh->prepare($sql);
     $sth->execute($user);
@@ -76,7 +76,7 @@ sub get_userid {
     # Return a user's userid using a username
     my $user    = shift;
 
-    my $sql = qq{ select userid from users where username = ? };
+    my $sql = qq| select userid from users where username = ? |;
     my $dbh = db_connect();
     my $sth = $dbh->prepare($sql);
     $sth->execute($user);
@@ -89,12 +89,12 @@ sub get_userid {
     return;
 }
 
-sub is_waiting {
+sub get_waiting_session {
     # Return sessionid if a user is currently in a session
     my $userid  = shift;
 
-    my $sql = qq{ select sessionid from sessions where
-                        finished = 0 and wearerid = ? };
+    my $sql = qq| select sessionid from sessions where
+                        finished = 0 and wearerid = ? |;
     my $dbh = db_connect();
     my $sth = $dbh->prepare($sql);
     $sth->execute($userid);
@@ -107,11 +107,27 @@ sub is_waiting {
     return;
 }
 
+sub get_user_recipes {
+    # Return an array of recipes owned by userid
+    my $userid  = shift;
+    my $sql = qq| select recipe_key from recipes where ownerid = ? |;
+    my $dbh = db_connect();
+    my $sth = $dbh->prepare($sql);
+    $sth->execute($userid);
+    my @recipes = ();
+    while (my ($recipe_key) = $sth->fetchrow_array()) {
+        push @recipes, $recipe_key;
+    }
+    $sth->finish();
+    $dbh->disconnect();
+    return @recipes;
+}
+
 sub get_recipe_by_key {
     # Return a hashref of the recipe settings, if found
     my $recipe_key  = shift;
 
-    my $sql = qq{ select * from recipes where recipe_key = ? };
+    my $sql = qq| select * from recipes where recipe_key = ? |;
     my $dbh = db_connect();
     my $sth = $dbh->prepare($sql);
     $sth->execute($recipe_key);
@@ -129,7 +145,7 @@ sub make_user {
     my $user    = shift;
     my $pass    = shift;
 
-    my $sql = qq { select userid from users where username = ? };
+    my $sql = qq| select userid from users where username = ? |;
     my $dbh = db_connect();
     my $sth = $dbh->prepare($sql);
     $sth->execute($user);
@@ -145,7 +161,7 @@ sub make_user {
     my $salt = join '',('.','.',0..9,'A'..'Z','a'..'z')[rand 64, rand 64];
     my $hash = crypt($pass,$salt);
 
-    $sql = qq{ insert into users (username,password) values (?, ?) };
+    $sql = qq| insert into users (username,password) values (?, ?) |;
     $sth = $dbh->prepare($sql);
     my $rv = $sth->execute($user,$hash);
     $sth->finish();
@@ -163,7 +179,7 @@ sub is_recipe_owner {
     my $userid  = shift;
     my $recipe  = shift;
 
-    my $sql = qq{ select ownerid from recipes where recipe_key = ? };
+    my $sql = qq| select ownerid from recipes where recipe_key = ? |;
     my $dbh = db_connect();
     my $sth = $dbh->prepare($sql);
     $sth->execute($recipe);
@@ -176,13 +192,27 @@ sub is_recipe_owner {
     return;
 }
 
+sub delete_recipe {
+    my $recipe_key = shift;
+    my $sql = qq| delete from recipes where recipe_key = ? |;
+    my $dbh = db_connect();
+    my $sth = $dbh->prepare($sql);
+    my $rv = $sth->execute($recipe_key);
+    $sth->finish();
+    $dbh->disconnect();
+    if ($rv > 0) {
+        return 1;
+    }
+    return;
+}
+
 sub create_new_recipe {
     # Create a new default recipe for $userid
     my $userid  = shift;
     my $recipe_key = make_key('recipes','recipe_key');
 
-    my $sql = qq{ insert into recipes (ownerid, name, recipe_key)
-                    values (?, ?, ?) };
+    my $sql = qq| insert into recipes (ownerid, name, recipe_key)
+                    values (?, ?, ?) |;
     my $dbh = db_connect();
     my $sth = $dbh->prepare($sql);
     my $rv = $sth->execute($userid,$recipe_key,$recipe_key);
@@ -210,10 +240,10 @@ sub make_recipe {
     my $recipe_key = make_key('recipes','recipe_key');
 
     my $dbh = db_connect();
-    my $sql = qq{ insert into recipes (ownerid, recipe_key, name,
+    my $sql = qq| insert into recipes (ownerid, recipe_key, name,
                     min_time, max_time, start_time, start_rand,
                     min_votes, vote_times, time_past, time_left)
-                    values (?,?,?,?,?,?,?,?,?,?,?) };
+                    values (?,?,?,?,?,?,?,?,?,?,?) |;
     my $sth = $dbh->prepare($sql);
     my $rv = $sth->execute($ownerid, $recipe_key, $name,
                     $min_time, $max_time, $start_time, $start_rand,
@@ -231,8 +261,8 @@ sub alter_time {
     my $sessionid   = shift;
     my $adjustment  = shift;
 
-    my $sql = qq{ update sessions set end_time = end_time + ?
-                        where sessionid = ? };
+    my $sql = qq| update sessions set end_time = end_time + ?
+                        where sessionid = ? |;
     my $dbh = db_connect();
     my $sth = $dbh->prepare($sql);
     my $rv = $sth->execute($adjustment, $sessionid);
@@ -249,14 +279,14 @@ sub get_end_time {
     my $sessionid   = shift;
 
     my $dbh = db_connect();
-    my $sql = qq{ select start_time,end_time,recipeid from sessions
-                    where sessionid = ? };
+    my $sql = qq| select start_time,end_time,recipeid from sessions
+                    where sessionid = ? |;
     my $sth = $dbh->prepare($sql);
     $sth->execute($sessionid);
     my ($start_time,$end_time,$recipeid) = $sth->fetchrow_array();
     $sth->finish();
 
-    $sql = qq{ select max_time from recipes where recipeid = ? };
+    $sql = qq| select max_time from recipes where recipeid = ? |;
     $sth = $dbh->prepare($sql);
     $sth->execute($recipeid);
     my ($max_time) = $sth->fetchrow_array();
@@ -340,7 +370,7 @@ sub make_key {
 
     my @alphabet = ('A'..'Z', 'a'..'z', 0..9);
 
-    my $sql = qq{ select $keyname from $table where $keyname = ? };
+    my $sql = qq| select $keyname from $table where $keyname = ? |;
     my $dbh = db_connect();
     my $sth = $dbh->prepare($sql);
 

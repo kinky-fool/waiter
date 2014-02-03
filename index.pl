@@ -35,7 +35,7 @@ sub login_page {
     my $error = shift || '';
 
     Waiter::WWW::page_header('The Waiting Game Login Page',0);
-    print qq{
+    print qq|
     <form method='post'>
       <table id='login'>
         <tr>
@@ -53,6 +53,6 @@ sub login_page {
       </table>
       <input type='submit' name='action' value='login' />
     </form>
-};
+|;
     Waiter::WWW::page_footer($error);
 }
