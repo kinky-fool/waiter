@@ -362,6 +362,90 @@ sub convert_to_seconds {
     return $seconds;
 }
 
+sub human_time {
+    my $seconds = shift;
+
+    my $output = '';
+    my ($weeks,$days,$hours,$minutes,$seconds) = convert_from_seconds($seconds);
+    if ($weeks > 0) {
+        $output = sprintf("%d %s, %d %s, %d %s, %d %s and %d %s",
+        $weeks, ($weeks == 1)?"week":"weeks",
+        $days, ($days == 1)?"day":"days",
+        $hours, ($hours == 1)?"hour":"hours",
+        $minutes, ($minutes==1)?"minute":"minutes",
+        $seconds, ($seconds==1)?"second":"seconds");
+    } elsif ($days > 0) {
+        $output = sprintf("%d %s, %d %s, %d %s and %d %s",
+        $days, ($days == 1)?"day":"days",
+        $hours, ($hours == 1)?"hour":"hours",
+        $minutes, ($minutes==1)?"minute":"minutes",
+        $seconds, ($seconds==1)?"second":"seconds");
+    } elsif ($hours > 0) {
+        $output = sprintf("%d %s, %d %s and %d %s",
+        $hours, ($hours == 1)?"hour":"hours",
+        $minutes, ($minutes==1)?"minute":"minutes",
+        $seconds, ($seconds==1)?"second":"seconds");
+    } elsif ($minutes > 0) {
+        $output = sprintf("%d %s and %d %s",
+        $minutes, ($minutes==1)?"minute":"minutes",
+        $seconds, ($seconds==1)?"second":"seconds");
+    } else {
+        $output = sprintf("%d %s",
+        $seconds, ($seconds==1)?"second":"seconds");
+    }
+
+    return $output;
+}
+
+sub fuzzy_time {
+    my $seconds = shift;
+    my $unit    = shift;
+    my $range   = shift;
+    my $max     = shift;
+    my $type    = shift;
+
+    my $single = $type;
+    $single =~ s/s$//;
+
+    my $text = '';
+    for my $i (1 .. $max) {
+        if ($seconds > ($i * $unit + $range)) {
+            $text = sprintf('more than %d %s',$i,($i==1)?$single:$type);
+        } elsif ($seconds > ($i * $unit - $range) and
+                 $seconds < ($i * $unit + $range)) {
+            $text = sprintf('about %d %s',$i,($i==1)?$single:$type);
+        }
+    }
+    return $text;
+}
+
+sub approx_time {
+    my $seconds = shift;
+
+    my $output = '';
+    my $year    = 365 * 24 * 60 * 60;
+    my $month   =  30 * 24 * 60 * 60;
+    my $week    =   7 * 24 * 60 * 60;
+    my $day     =       24 * 60 * 60;
+    my $hour    =            60 * 60;
+
+    if ($seconds > ($year - $month)) {
+        $output = fuzzy_time($seconds,$year,$month,10,'years');
+    } elsif ($seconds > ($month - $day * 5)) {
+        $output = fuzzy_time($seconds,$month,$day * 5,12,'months');
+    } elsif ($seconds > ($week - $day * 2)) {
+        $output = fuzzy_time($seconds,$week,$day * 2,4,'weeks');
+    } elsif ($seconds > ($day - $hour * 4)) {
+        $output = fuzzy_time($seconds,$day,$hour * 4,7,'days');
+    } elsif ($seconds > ($hour - 15 * 60)) {
+        $output = fuzzy_time($seconds,$hour,15 * 60,24,'hours');
+    } else {
+        $output = fuzzy_time($seconds,60,15,60,'minutes');
+    }
+
+    return $output;
+}
+
 sub time_remaining {
     # Return time left on a session's clock in a format like:
     # 1 week, 4 days, 10 hours, 3 minutes and 43 seconds
