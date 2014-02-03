@@ -266,6 +266,10 @@ sub time_checkboxes {
 sub vote_options {
     my $min         = shift;
     my $cooldown    = shift;
+    my $msg_times   = shift;
+
+    my $mtchecked = '';
+    $mtchecked = ' checked' if ($msg_times > 0);
 
     my $html = qq|
       <tr valign='center'>
@@ -278,17 +282,130 @@ sub vote_options {
         </td>
         <td align='right'>
           <select name='cooldown'>
-};
+|;
     for my $i (24,18,12,6,4,2,1) {
         my $selected = '';
         $selected = ' selected' if ($i == $cooldown);
         $html .= sprintf("            <option value='%d'%s>%d %s</option>\n",
                 $i,$selected,$i,($i == 1)?'Hour':'Hours');
     }
-    $html .= qq{          </select>
+    $html .= qq|          </select>
         </td>
       </tr>
-};
+      <tr valign='center'>
+        <td align='left'>
+            <label for='msg_times'>Show Times in Messages</label>
+        </td>
+        <td align='right'>
+            <input type='checkbox' id='msg_times' name='msg_times'$mtchecked>
+        </td>
+      </tr>
+|;
+    return $html;
+}
+
+sub misc_options {
+    my $start_rand  = shift;
+    my $time_past   = shift;
+    my $time_left   = shift;
+    my $safeword    = shift;
+
+    my %ck = (
+        "sr$start_rand" => ' checked',
+        "tp$time_past"  => ' checked',
+        "tl$time_left"  => ' checked',
+    );
+
+    my $html = qq|
+    <table class='options'>
+      <tr valign='center'>
+        <td align='left'>
+          <label for='sr0'>Don't Randomize Start Time</label>
+        </td>
+        <td align='right'>
+          <input type='radio' id='sr0' name='start_rand' value='0' $ck{sr0} />
+        </td>
+      </tr>
+      <tr valign='center'>
+        <td align='left'>
+          <label for='sr1'>Random Start Time (Zero to Start Time)</label>
+        </td>
+        <td align='right'>
+          <input type='radio' id='sr1' name='start_rand' value='1' $ck{sr1} />
+        </td>
+      </tr>
+      <tr valign='center'>
+        <td align='left'>
+          <label for='sr2'>Random Start Time; Low End of Start Time</label>
+        </td>
+        <td align='right'>
+          <input type='radio' id='sr2' name='start_rand' value='2' $ck{sr2} />
+        </td>
+      </tr>
+      <tr valign='center'>
+        <td align='left'>
+          <label for='sr3'>Random Start Time; High End of Start Time</label>
+        </td>
+        <td align='right'>
+          <input type='radio' id='sr3' name='start_rand' value='3' $ck{sr3} />
+        </td>
+      </tr>
+    </table>
+    <hr/>
+    <table class='options'>
+      <tr valign='center'>
+        <td align='left'>
+          <label for='tp0'>Hide Time Spent Waiting</label>
+        </td>
+        <td align='right'>
+          <input type='radio' id='tp0' name='time_past' value='0' $ck{tp0} />
+        </td>
+      </tr>
+      <tr valign='center'>
+        <td align='left'>
+          <label for='tp1'>Show Time Spent Waiting</label>
+        </td>
+        <td align='right'>
+          <input type='radio' id='tp1' name='time_past' value='1' $ck{tp1} />
+        </td>
+      </tr>
+      <tr valign='center'>
+        <td align='left'>
+          <label for='tp2'>Show 'Approximate' Time Spent Waiting</label>
+        </td>
+        <td align='right'>
+          <input type='radio' id='tp2' name='time_past' value='2' $ck{tp2} />
+        </td>
+      </tr>
+    </table>
+    <hr/>
+    <table class='options'>
+      <tr valign='center'>
+        <td align='left'>
+          <label for='tl0'>Hide Time Remaining</label>
+        </td>
+        <td align='right'>
+          <input type='radio' id='tl0' name='time_left' value='0' $ck{tl0} />
+        </td>
+      </tr>
+      <tr valign='center'>
+        <td align='left'>
+          <label for='tl1'>Show Time Remaining</label>
+        </td>
+        <td align='right'>
+          <input type='radio' id='tl1' name='time_left' value='1' $ck{tl1} />
+        </td>
+      </tr>
+      <tr valign='center'>
+        <td align='left'>
+          <label for='tl2'>Show 'Approximate' Time Remaining</label>
+        </td>
+        <td align='right'>
+          <input type='radio' id='tl2' name='time_left' value='2' $ck{tl2} />
+        </td>
+      </tr>
+    </table>
+|;
     return $html;
 }
 
