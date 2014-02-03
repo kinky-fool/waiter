@@ -224,6 +224,40 @@ sub create_new_recipe {
     return;
 }
 
+sub update_recipe {
+    # Update the settings of a recipe
+    my $ownerid         = shift;
+    my $recipe_key      = shift;
+    my $name            = shift;
+    my $min_time        = shift;
+    my $max_time        = shift;
+    my $start_time      = shift;
+    my $start_rand      = shift;
+    my $min_votes       = shift;
+    my $vote_times      = shift;
+    my $vote_cooldown   = shift;
+    my $time_past       = shift;
+    my $time_left       = shift;
+    my $msg_times       = shift;
+    my $safeword        = shift;
+
+    my $sql = qq| update recipes set name = ?, min_time = ?, max_time = ?,
+                start_time = ?, start_rand = ?, min_votes = ?, vote_times = ?,
+                vote_cooldown = ?, time_past = ?, time_left = ?,
+                msg_times = ?, safeword = ?
+                where recipe_key = ? and ownerid = ? |;
+    my $dbh = db_connect();
+    my $sth = $dbh->prepare($sql);
+    my $rv = $sth->execute($name,$min_time,$max_time,$start_time,$start_rand,
+                            $min_votes,$vote_times,$vote_cooldown,$time_past,
+                            $time_left,$msg_times,$safeword,$recipe_key,
+                            $ownerid);
+    if ($rv > 0) {
+        return 1;
+    }
+    return;
+}
+
 sub make_recipe {
     # Create a waiting recipe
     my $ownerid     = shift;
