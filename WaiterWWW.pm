@@ -134,11 +134,24 @@ sub prepare_recipe {
 
 sub page_header {
     my $title   = shift;
-    my $logout  = shift || 0;
+    my $links   = shift || 0;
 
     my $logout_link = '';
-    if ($logout) {
-        $logout_link = "<p id='logout'><a href='logout.pl'>logout</a></p>";
+    if ($links) {
+        $links = qq|
+        <p id='top_links'>
+        <a href='home.pl'>Home</a>
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        <a href='recipes.pl'>Manage Recipes</a>
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        <a href='settings.pl'>Settings</a>
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        <a href='logout.pl'>logout</a>
+        </p>
+        |;
     }
     print <<ENDL;
 Content-Type: text/html; charset=ISO-8859-1
@@ -156,8 +169,10 @@ Cache-Control: no-cache, no-store, must-revalidate
   </head>
   <body>
   <div id='container'>
-    $logout_link
-    <h4>$title</h4>
+    <div id='header_links'>
+    $links
+    </div>
+    <h2>$title</h2>
 ENDL
 }
 
