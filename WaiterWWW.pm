@@ -135,7 +135,7 @@ sub time_dropdown {
     my $caption = shift || '';
     my $seconds = shift;
 
-    my ($weeks,$days,$hours) = Waiter::convert_seconds($seconds);
+    my ($weeks,$days,$hours) = Waiter::convert_from_seconds($seconds);
 
     my $html = qq|
       <tr valign='center'>

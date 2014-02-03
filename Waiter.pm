@@ -303,7 +303,7 @@ sub get_end_time {
     return 0;
 }
 
-sub convert_seconds {
+sub convert_from_seconds {
     # Convert seconds to weeks, days, hours, minutes, seconds
     my $seconds = shift;
 
@@ -316,6 +316,18 @@ sub convert_seconds {
     return;
 }
 
+sub convert_to_seconds {
+    # Convert weeks/days/hours to seconds
+    my $weeks   = shift;
+    my $days    = shift;
+    my $hours   = shift;
+
+    my $seconds = ($weeks * 7 * 24 * 60 * 60) +
+                  ($days * 24 * 60 * 60) +
+                  ($hours * 60 * 60);
+    return $seconds;
+}
+
 sub time_remaining {
     # Return time left on a session's clock in a format like:
     # 1 week, 4 days, 10 hours, 3 minutes and 43 seconds
@@ -324,7 +336,8 @@ sub time_remaining {
     my $end_time = get_end_time($session);
     my $seconds = $end_time - time;
     if ($seconds > 0) {
-        my ($weeks,$days,$hours,$minutes,$seconds) = convert_seconds($seconds);
+        my ($weeks,$days,$hours,$minutes,$seconds) =
+            convert_from_seconds($seconds);
 
         my $output = '';
         if ($weeks > 0) {
