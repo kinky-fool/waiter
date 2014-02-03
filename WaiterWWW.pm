@@ -88,6 +88,50 @@ sub save_session {
     $session->flush();
 }
 
+sub prepare_recipe {
+    # Take recipe data in from the web and format it as needed
+    my $data    = shift;
+
+    my $userid = Waiter::get_userid($$data{username});
+
+    # Convert dropdown times to seconds
+    my $start_time = Waiter::convert_to_seconds(
+        $$data{weeks_start},$$data{days_start},$$data{hours_start}
+    );
+    my $min_time = Waiter::convert_to_seconds(
+        $$data{weeks_min},$$data{days_min},$$data{hours_min}
+    );
+    my $max_time = Waiter::convert_to_seconds(
+        $$data{weeks_max},$$data{days_max},$$data{hours_max}
+    );
+
+    # Voting Times
+    my @v_times;
+    foreach my $key (keys %$data) {
+        if ($key =~ /^sub_([0-9]+)$/) {
+            push(@v_times,"-$1");
+        }
+        if ($key =~ /^add_([0-9]+)$/) {
+            push(@v_times,"$1");
+        }
+    }
+    my $vote_times = join(':',@v_times);
+
+    my $min_votes = 0;
+    if ($$data{min_votes} and ($$data{min_votes} =~ /^[0-9]+$/)) {
+        $min_votes = $$data{min_votes} if ($$data{min_votes});
+    }
+    my $msg_times = 0;
+    if ($$data{msg_times}) {
+        $msg_times = 1;
+    }
+
+    return ($userid,$$data{recipe_key},$$data{name},$min_time,$max_time,
+            $start_time,$$data{start_rand},$min_votes,$vote_times,
+            $$data{cooldown},$$data{time_past},$$data{time_left},$msg_times,
+            $$data{safeword});
+}
+
 sub page_header {
     my $title   = shift;
     my $logout  = shift || 0;
