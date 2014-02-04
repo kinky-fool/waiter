@@ -157,6 +157,22 @@ sub get_user_recipes {
     return @recipes;
 }
 
+sub get_user_sessions {
+    # Return an array of session_keys owned by userid
+    my $userid  = shift;
+    my $sql = qq| select session_key from sessions where trusteeid = ? |;
+    my $dbh = db_connect();
+    my $sth = $dbh->prepare($sql);
+    $sth->execute($userid);
+    my @session_keys = ();
+    while (my ($session_key) = $sth->fetchrow_array()) {
+        push @session_keys, $session_key;
+    }
+    $sth->finish();
+    $dbh->disconnect();
+    return @session_keys;
+}
+
 sub get_recipe_by_key {
     # Return a hashref of the recipe settings, if found
     my $recipe_key  = shift;
@@ -170,6 +186,23 @@ sub get_recipe_by_key {
     $dbh->disconnect();
     if ($recipe) {
         return $recipe;
+    }
+    return;
+}
+
+sub get_session_by_key {
+    # Return a hashref of the session settings, if found
+    my $session_key  = shift;
+
+    my $sql = qq| select * from sessions where session_key = ? |;
+    my $dbh = db_connect();
+    my $sth = $dbh->prepare($sql);
+    $sth->execute($session_key);
+    my $session = $sth->fetchrow_hashref();
+    $sth->finish();
+    $dbh->disconnect();
+    if ($session) {
+        return $session;
     }
     return;
 }
@@ -275,6 +308,24 @@ sub is_recipe_owner {
     return;
 }
 
+sub is_session_owner {
+    # Verify that a user owns the session
+    my $userid      = shift;
+    my $session_key = shift;
+
+    my $sql = qq| select trusteeid from sessions where session_key = ? |;
+    my $dbh = db_connect();
+    my $sth = $dbh->prepare($sql);
+    $sth->execute($session_key);
+    my ($owner) = $sth->fetchrow_array();
+    $sth->finish();
+    $dbh->disconnect();
+    if ($owner eq $userid) {
+        return 1;
+    }
+    return;
+}
+
 sub delete_recipe {
     my $recipe_key = shift;
     my $sql = qq| delete from recipes where recipe_key = ? |;
@@ -309,20 +360,20 @@ sub create_new_recipe {
 
 sub update_recipe {
     # Update the settings of a recipe
-    my $ownerid         = shift;
-    my $recipe_key      = shift;
-    my $name            = shift;
-    my $min_time        = shift;
-    my $max_time        = shift;
-    my $init_time       = shift;
-    my $init_rand       = shift;
-    my $min_votes       = shift;
-    my $vote_times      = shift;
-    my $vote_cooldown   = shift;
-    my $time_past       = shift;
-    my $time_left       = shift;
-    my $msg_times       = shift;
-    my $safeword        = shift;
+    my $ownerid     = shift;
+    my $recipe_key  = shift;
+    my $name        = shift;
+    my $min_time    = shift;
+    my $max_time    = shift;
+    my $init_time   = shift;
+    my $init_rand   = shift;
+    my $min_votes   = shift;
+    my $vote_times  = shift;
+    my $cooldown    = shift;
+    my $time_past   = shift;
+    my $time_left   = shift;
+    my $msg_times   = shift;
+    my $safeword    = shift;
 
     my $sql = qq| update recipes set name = ?, min_time = ?, max_time = ?,
                 init_time = ?, init_rand = ?, min_votes = ?, vote_times = ?,
@@ -331,10 +382,38 @@ sub update_recipe {
                 where recipe_key = ? and ownerid = ? |;
     my $dbh = db_connect();
     my $sth = $dbh->prepare($sql);
-    my $rv = $sth->execute($name,$min_time,$max_time,$init_time,$init_rand,
-                            $min_votes,$vote_times,$vote_cooldown,$time_past,
-                            $time_left,$msg_times,$safeword,$recipe_key,
-                            $ownerid);
+    my $rv = $sth->execute($name, $min_time, $max_time, $init_time, $init_rand,
+                    $min_votes, $vote_times, $cooldown, $time_past, $time_left,
+                    $msg_times, $safeword, $recipe_key, $ownerid);
+    if ($rv > 0) {
+        return 1;
+    }
+    return;
+}
+
+sub update_session {
+    # Update the settings of a recipe
+    my $trusteeid   = shift;
+    my $session_key = shift;
+    my $min_time    = shift;
+    my $max_time    = shift;
+    my $min_votes   = shift;
+    my $vote_times  = shift;
+    my $cooldown    = shift;
+    my $time_past   = shift;
+    my $time_left   = shift;
+    my $msg_times   = shift;
+    my $safeword    = shift;
+
+    my $sql = qq| update sessions set min_time = ?, max_time = ?,
+                min_votes = ?, vote_times = ?, vote_cooldown = ?, time_past = ?,
+                time_left = ?, msg_times = ?, safeword = ?
+                where session_key = ? and trusteeid = ? |;
+    my $dbh = db_connect();
+    my $sth = $dbh->prepare($sql);
+    my $rv = $sth->execute($min_time, $max_time, $min_votes,
+                    $vote_times, $cooldown, $time_past, $time_left, $msg_times,
+                    $safeword, $session_key, $trusteeid);
     if ($rv > 0) {
         return 1;
     }
@@ -412,16 +491,16 @@ sub make_recipe {
     return;
 }
 
-sub alter_time {
+sub update_end_time {
     # Adjust the remaining time of a session
-    my $sessionid   = shift;
+    my $session_key = shift;
     my $adjustment  = shift;
 
     my $sql = qq| update sessions set end_time = end_time + ?
-                        where sessionid = ? |;
+                        where session_key = ? |;
     my $dbh = db_connect();
     my $sth = $dbh->prepare($sql);
-    my $rv = $sth->execute($adjustment, $sessionid);
+    my $rv = $sth->execute($adjustment, $session_key);
     $sth->finish();
     $dbh->disconnect();
 

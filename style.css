@@ -10,7 +10,7 @@ div#container {
     display:        block;
     position:       relative;
     margin:         0 auto
-    width:          400px;
+    width:          500px;
 }
 
 div#main {
@@ -20,7 +20,24 @@ div#main {
 table.options {
     margin:         10px auto;
     padding:        2px;
-    width:          350px;
+    width:          400px;
+}
+
+div.status {
+    margin:         10px auto;
+    overflow:       hidden;
+    width:          500px;
+}
+
+span.left {
+    float:          left;
+    text-align:     left;
+    width:          200px;
+}
+
+span.right {
+    float:          right;
+    text-align:     right;
 }
 
 td {
@@ -71,10 +88,6 @@ a:visited {
     text-decoration: none;
 }
 
-p#info {
-    font-size:      18px;
-    font-weight:    bolder;
-}
 
 p#warning {
     font-size:      18px;
