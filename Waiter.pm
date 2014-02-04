@@ -89,6 +89,40 @@ sub get_userid {
     return;
 }
 
+sub get_username {
+    # Return a username provided a userid
+    my $userid  = shift;
+
+    my $sql = qq| select username from users where userid = ? |;
+    my $dbh = db_connect();
+    my $sth = $dbh->prepare($sql);
+    $sth->execute($userid);
+    my ($username) = $sth->fetchrow_array();
+    $sth->finish();
+    $dbh->disconnect();
+    if ($username and ($username ne '')) {
+        return $username;
+    }
+    return;
+}
+
+sub get_user_key {
+    # Return a user's user_key
+    my $userid  = shift;
+
+    my $sql = qq| select user_key from users where userid = ? |;
+    my $dbh = db_connect();
+    my $sth = $dbh->prepare($sql);
+    $sth->execute($userid);
+    my ($user_key) = $sth->fetchrow_array();
+    $sth->finish();
+    $dbh->disconnect();
+    if ($user_key and ($user_key ne '')) {
+        return $user_key;
+    }
+    return;
+}
+
 sub get_waiting_session {
     # Return sessionid if a user is currently in a session
     my $userid  = shift;
@@ -138,6 +172,53 @@ sub get_recipe_by_key {
         return $recipe;
     }
     return;
+}
+
+sub get_session {
+    my $sessionid = shift;
+
+    my $sql = qq| select * from sessions where sessionid = ? |;
+    my $dbh = db_connect();
+    my $sth = $dbh->prepare($sql);
+    $sth->execute($sessionid);
+    my $session = $sth->fetchrow_hashref();
+    $sth->finish();
+    $dbh->disconnect();
+    if ($session) {
+        return $session;
+    }
+    return;
+}
+
+sub get_votes {
+    my $sessionid = shift;
+
+    my $sql = qq| select count(*) from votes where sessionid = ? |;
+    my $dbh = db_connect();
+    my $sth = $dbh->prepare($sql);
+    $sth->execute($sessionid);
+    my ($votes) = $sth->fetchrow_array();
+    $sth->finish();
+    $dbh->disconnect();
+    return $votes;
+}
+
+sub get_messages {
+    my $userid = shift;
+
+    my $sql = qq| select messageid,sender,time,message from messages
+                    where to_id = ? |;
+    my $dbh = db_connect();
+    my $sth = $dbh->prepare($sql);
+    $sth->execute($userid);
+    my $messages = $sth->fetchall_hashref('messageid');
+    foreach my $id (keys %$messages) {
+        $$messages{$id}{time} = POSIX::strftime("%F %T",
+                localtime($$messages{$id}{time}));
+    }
+    $sth->finish();
+    $dbh->disconnect();
+    return $messages;
 }
 
 sub make_user {
