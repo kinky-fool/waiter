@@ -381,14 +381,6 @@ sub misc_options {
     <table class='options'>
       <tr valign='center'>
         <td align='left'>
-          <label for='tp0'>Hide Time Spent Waiting</label>
-        </td>
-        <td align='right'>
-          <input type='radio' id='tp0' name='time_past' value='0' $ck{tp0} />
-        </td>
-      </tr>
-      <tr valign='center'>
-        <td align='left'>
           <label for='tp1'>Show Time Spent Waiting</label>
         </td>
         <td align='right'>
@@ -403,17 +395,17 @@ sub misc_options {
           <input type='radio' id='tp2' name='time_past' value='2' $ck{tp2} />
         </td>
       </tr>
+      <tr valign='center'>
+        <td align='left'>
+          <label for='tp0'>Hide Time Spent Waiting</label>
+        </td>
+        <td align='right'>
+          <input type='radio' id='tp0' name='time_past' value='0' $ck{tp0} />
+        </td>
+      </tr>
     </table>
     <hr/>
     <table class='options'>
-      <tr valign='center'>
-        <td align='left'>
-          <label for='tl0'>Hide Time Remaining</label>
-        </td>
-        <td align='right'>
-          <input type='radio' id='tl0' name='time_left' value='0' $ck{tl0} />
-        </td>
-      </tr>
       <tr valign='center'>
         <td align='left'>
           <label for='tl1'>Show Time Remaining</label>
@@ -428,6 +420,14 @@ sub misc_options {
         </td>
         <td align='right'>
           <input type='radio' id='tl2' name='time_left' value='2' $ck{tl2} />
+        </td>
+      </tr>
+      <tr valign='center'>
+        <td align='left'>
+          <label for='tl0'>Hide Time Remaining</label>
+        </td>
+        <td align='right'>
+          <input type='radio' id='tl0' name='time_left' value='0' $ck{tl0} />
         </td>
       </tr>
     </table>
