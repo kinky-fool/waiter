@@ -588,11 +588,12 @@ sub get_end_time {
 
 sub convert_from_seconds {
     # Convert seconds to weeks, days, hours, minutes, seconds
-    my $seconds = shift;
+    my $time = shift;
 
-    $seconds = abs($seconds);
-    return if ($seconds =~ /[^0-9]/);
-    my ($days,$hours,$minutes,$seconds) = (gmtime($seconds))[7,2,1,0];
+    $time = abs($time);
+    # Bail if $time is anything but digits
+    return if ($time =~ /[^0-9]/);
+    my ($days,$hours,$minutes,$seconds) = (gmtime($time))[7,2,1,0];
     my $weeks = int($days / 7);
     $days = $days - ($weeks * 7);
     return ($weeks,$days,$hours,$minutes,$seconds);
