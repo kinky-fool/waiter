@@ -457,13 +457,12 @@ sub convert_from_seconds {
     # Convert seconds to weeks, days, hours, minutes, seconds
     my $seconds = shift;
 
-    if ($seconds > 0) {
-        my ($days,$hours,$minutes,$seconds) = (gmtime($seconds))[7,2,1,0];
-        my $weeks = int($days / 7);
-        $days = $days - ($weeks * 7);
-        return ($weeks,$days,$hours,$minutes,$seconds);
-    }
-    return;
+    $seconds = abs($seconds);
+    return if ($seconds =~ /[^0-9]/);
+    my ($days,$hours,$minutes,$seconds) = (gmtime($seconds))[7,2,1,0];
+    my $weeks = int($days / 7);
+    $days = $days - ($weeks * 7);
+    return ($weeks,$days,$hours,$minutes,$seconds);
 }
 
 sub convert_to_seconds {

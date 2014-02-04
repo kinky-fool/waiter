@@ -38,14 +38,10 @@ if (Waiter::auth_user($$data{username},$$data{hash})) {
         }
     } elsif ($$data{rm}) {
         if (Waiter::is_recipe_owner($userid,$$data{recipe_key})) {
-            if ($$data{confirm}) {
-                if (Waiter::delete_recipe($$data{recipe_key})) {
-                    recipe_list_page("Recipe $$data{recipe_key} deleted");
-                } else {
-                    recipe_list_page("Failed to delete recipe");
-                }
+            if (Waiter::delete_recipe($$data{recipe_key})) {
+                recipe_list_page("Recipe $$data{recipe_key} deleted");
             } else {
-                recipe_list_page('Please check confirm delete');
+                recipe_list_page("Failed to delete recipe: Unknown Error");
             }
         } else {
             recipe_list_page('That is not your recipe to delete');
@@ -123,25 +119,20 @@ sub recipe_modify_page {
       <hr/>
       <table class='options'>
         <tr valign='center'>
-          <td align='right'>
+          <td align='left'>
             Safeword:
           </td>
-          <td>&nbsp;</td>
-          <td align='left'>
+          <td align='right'>
             <input type='text' name='safeword' value='$$recipe{safeword}'>
           </td>
         </tr>
         <tr valign='center'>
           <td align='left'>
-            <input type='submit' name='save' value='Save'>
-          </td>
-          <td align='left'>
             <input type='submit' name='rm' value='Delete'>
           </td>
-          <td>
+          <td align='right'>
+            <input type='submit' name='save' value='Save'>
             <input type='hidden' name='recipe_key' value='$recipe_key'>
-            <input type='checkbox' id='confirm' name='confirm'>
-            <label for='confirm'>Confirm Delete</label>
           </td>
         </tr>
       </table>
