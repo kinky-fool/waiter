@@ -146,6 +146,9 @@ sub page_header {
         <a href='recipes.pl'>Manage Recipes</a>
         &nbsp;&nbsp;&nbsp;&nbsp;
         &nbsp;&nbsp;&nbsp;&nbsp;
+        <a href='sessions.pl'>Manage Sessions</a>
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp;&nbsp;
         <a href='settings.pl'>Settings</a>
         &nbsp;&nbsp;&nbsp;&nbsp;
         &nbsp;&nbsp;&nbsp;&nbsp;
@@ -469,23 +472,9 @@ sub session_status {
     </form>
 |;
     }
-    $html .= "<p>Voting Link: $url/votes.pl?id=$user_key</p>";
+    $html .= "<p>Voting Link: $vote_url</p>";
 
     return $html;
-}
-
-sub information_html {
-    # Produce a block of HTML that shows a users' basic information
-    my $user    = shift;
-
-    my $userid = Waiter::get_userid($user);
-    my $information = '';
-    if (my $session = Waiter::is_waiting($userid)) {
-        $information = "<h3>In a Session</h3>";
-    } else {
-        $information = "<h3>Not in a Session</h3>";
-    }
-    return $information;
 }
 
 sub messages_html {
