@@ -133,11 +133,11 @@ sub prepare_recipe {
 }
 
 sub page_header {
-    my $title   = shift;
-    my $links   = shift || 0;
+    my $title       = shift;
+    my $show_links  = shift || 0;
 
-    my $logout_link = '';
-    if ($links) {
+    my $links = '';
+    if ($show_links) {
         $links = qq|
         <p id='top_links'>
         <a href='home.pl'>Home</a>
