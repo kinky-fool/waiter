@@ -396,6 +396,42 @@ sub radio_options {
     return $html;
 }
 
+sub vote_choice {
+    # Generate dropdown to present to voters
+    my $vtimes  = shift;
+
+    my @times = sort {$a <=> $b} (split/:/,$vtimes);
+    my $select = $times[rand(@times)];
+    my $html = qq|
+    <div class='status'>
+      <span class='left'>
+        <select name='vote_choice'>|;
+    foreach my $time (@times) {
+        my $abstime = abs($time);
+        my $selected = '';
+        $selected = ' selected' if ($time == $select);
+        my $verb = 'Increase';
+        if ($time < 0) {
+            $verb = 'Decrease';
+        }
+        $html .= qq|
+          <option value='$time'$selected>$verb wait by $abstime hours</option>
+|;
+    }
+    $html .= qq|
+          <option value='rand'>Select at Random</option>
+          <option value='randsub'>Select Random Decrease</option>
+          <option value='randadd'>Select Random Increase</option>
+        </select>
+      </span>
+      <span class='right'>
+        <input type='submit' name='cast_vote' value='Cast Your Vote'>
+      </span>
+    </div>
+|;
+    return $html;
+}
+
 sub session_status {
     my $sessionid   = shift;
 
