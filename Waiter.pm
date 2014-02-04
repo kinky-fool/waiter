@@ -89,6 +89,23 @@ sub get_userid {
     return;
 }
 
+sub get_userid_by_key {
+    # Return a user's id provided the unique user_key
+    my $user_key    = shift;
+
+    my $sql = qq| select userid from users where user_key = ? |;
+    my $dbh = db_connect();
+    my $sth = $dbh->prepare($sql);
+    $sth->execute($user_key);
+    my ($userid) = $sth->fetchrow_array();
+    $sth->finish();
+    $dbh->disconnect();
+    if ($userid and ($userid ne '')) {
+        return $userid;
+    }
+    return;
+}
+
 sub get_username {
     # Return a username provided a userid
     my $userid  = shift;
@@ -101,6 +118,25 @@ sub get_username {
     $sth->finish();
     $dbh->disconnect();
     if ($username and ($username ne '')) {
+        return $username;
+    }
+    return;
+}
+
+sub get_display_name {
+    # Return a user's display_name if set, username otherwise
+    my $userid  = shift;
+
+    my $sql = qq| select display_name,username from users where userid = ? |;
+    my $dbh = db_connect();
+    my $sth = $dbh->prepare($sql);
+    $sth->execute($userid);
+    my ($display_name,$username) = $sth->fetchrow_array();
+    $sth->finish();
+    $dbh->disconnect();
+    if ($display_name and ($display_name ne '')) {
+        return $display_name;
+    } elsif ($username and ($username ne '')) {
         return $username;
     }
     return;
@@ -234,6 +270,24 @@ sub get_votes {
     $sth->finish();
     $dbh->disconnect();
     return $votes;
+}
+
+sub last_vote_time_by_ip {
+    # Return the timestamp of an IPs last vote, or 0
+    my $ip  = shift;
+
+    my $sql = qq| select time from votes where ip = ?
+                    order by time desc limit 1 |;
+    my $dbh = db_connect();
+    my $sth = $dbh->prepare($sql);
+    $sth->execute($ip);
+    my ($time) = $sth->fetchrow_array();
+    $sth->finish();
+    $dbh->disconnect();
+    if ($time) {
+        return $time;
+    }
+    return 0;
 }
 
 sub get_messages {
