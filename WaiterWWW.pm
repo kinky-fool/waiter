@@ -400,7 +400,7 @@ sub session_status {
     my $sessionid   = shift;
 
     my $session = Waiter::get_session($sessionid);
-    my $trustee = Waiter::get_username($$session{trusteeid});
+    my $trustee = Waiter::get_display_name($$session{trusteeid});
     my $user_key = Waiter::get_user_key($$session{waiterid});
     my $votes   = Waiter::get_votes($sessionid);
     my $vote_url = "http://" . CGI::server_name() . "/vote.pl?key=$user_key";
