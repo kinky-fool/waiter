@@ -159,7 +159,7 @@ sub get_user_key {
     return;
 }
 
-sub get_waiting_session {
+sub get_sessionid_active {
     # Return sessionid if a user is currently in a session
     my $userid  = shift;
 

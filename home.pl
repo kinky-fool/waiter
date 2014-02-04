@@ -13,7 +13,7 @@ if (Waiter::auth_user($$data{username},$$data{hash})) {
     my $info = '';
     if ($$data{begin} and $$data{recipe_key} and $$data{recipe_key} ne '') {
         my $userid = Waiter::get_userid($$data{username});
-        if (Waiter::get_waiting_session($userid)) {
+        if (Waiter::get_sessionid_active($userid)) {
             $info = 'You are already waiting.';
         } else {
             if (my $recipe = Waiter::get_recipe_by_key($$data{recipe_key})) {
@@ -48,7 +48,7 @@ sub home_page {
 |;
 
     my $userid = Waiter::get_userid($$data{username});
-    my $sessionid = Waiter::get_waiting_session($userid);
+    my $sessionid = Waiter::get_sessionid_active($userid);
     if ($sessionid) {
         $status .= Waiter::WWW::session_status($sessionid);
     } else {
