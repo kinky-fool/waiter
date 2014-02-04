@@ -128,7 +128,7 @@ sub get_waiting_session {
     my $userid  = shift;
 
     my $sql = qq| select sessionid from sessions where
-                        finished = 0 and wearerid = ? |;
+                        finished = 0 and waiterid = ? |;
     my $dbh = db_connect();
     my $sth = $dbh->prepare($sql);
     $sth->execute($userid);
@@ -242,9 +242,11 @@ sub make_user {
     my $salt = join '',('.','.',0..9,'A'..'Z','a'..'z')[rand 64, rand 64];
     my $hash = crypt($pass,$salt);
 
-    $sql = qq| insert into users (username,password) values (?, ?) |;
+    my $user_key = make_key('users','user_key');
+
+    $sql = qq| insert into users (username,password,user_key) values (?,?,?) |;
     $sth = $dbh->prepare($sql);
-    my $rv = $sth->execute($user,$hash);
+    my $rv = $sth->execute($user,$hash,$user_key);
     $sth->finish();
     $dbh->disconnect();
     if ($rv > 0) {
@@ -444,10 +446,10 @@ sub convert_to_seconds {
 }
 
 sub human_time {
-    my $seconds = shift;
+    my $time    = shift;
 
     my $output = '';
-    my ($weeks,$days,$hours,$minutes,$seconds) = convert_from_seconds($seconds);
+    my ($weeks,$days,$hours,$minutes,$seconds) = convert_from_seconds($time);
     if ($weeks > 0) {
         $output = sprintf("%d %s, %d %s, %d %s, %d %s and %d %s",
         $weeks, ($weeks == 1)?"week":"weeks",
