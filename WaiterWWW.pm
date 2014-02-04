@@ -424,6 +424,56 @@ sub misc_options {
     return $html;
 }
 
+sub session_status {
+    my $sessionid   = shift;
+
+    my $session = Waiter::get_session($sessionid);
+    my $trustee = Waiter::get_username($$session{trusteeid});
+    my $user_key = Waiter::get_user_key($$session{waiterid});
+    my $votes   = Waiter::get_votes($sessionid);
+    my $vote_url = "http://" . CGI::server_name() . "/votes.pl?$user_key";
+
+    my $html = "<p>You are waiting for $trustee";
+    my $waited_time = abs($$session{start_time} - time);
+    if ($$session{time_past} > 0) {
+        my $waited = Waiter::human_time($waited_time);
+        if ($$session{time_past} == 2) {
+            $waited = Waiter::approx_time($waited_time);
+        }
+        $html .= "<p>You have been waiting $waited.</p>";
+    }
+
+    my $remaining = $$session{end_time} - time;
+    if ($remaining > 0) {
+        if ($$session{time_left} > 0) {
+            my $time_left = Waiter::human_time($remaining);
+            if ($$session{time_left} == 2) {
+                $time_left = Waiter::approx_time($remaining);
+            }
+            $html .= "<p>You must wait $time_left longer.</p>";
+        } else {
+            $html .= "<p>You must continue waiting.</p>";
+        }
+    } else {
+        $remaining = 0;
+    }
+    if ($$session{min_votes} > $votes) {
+        my $votes_needed = $$session{min_votes} - $votes;
+        $html .= qq|<p>$votes_needed people need to vote
+                    before you may end your wait.</p>|;
+    } elsif ($remaining == 0) {
+        $html .= qq|
+    <p>Your wait is over!</p>
+    <form method='post'>
+    <input type='submit' name='finish' value='End Wait!'/>
+    </form>
+|;
+    }
+    $html .= "<p>Voting Link: $url/votes.pl?id=$user_key</p>";
+
+    return $html;
+}
+
 sub information_html {
     # Produce a block of HTML that shows a users' basic information
     my $user    = shift;
