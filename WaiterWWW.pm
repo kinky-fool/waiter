@@ -62,6 +62,12 @@ sub read_params {
     foreach my $key (CGI::param()) {
         $data{$key} = CGI::param($key);
     }
+
+    # Read CGI ENV
+    foreach my $key (keys %ENV) {
+        $data{$key} = $ENV{$key};
+    }
+
     # Attempt to replace 'password' with 'hash'
     if ($data{username} and $data{password}) {
         $data{hash} = Waiter::make_hash($data{username},$data{password});
