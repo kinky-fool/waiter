@@ -28,9 +28,14 @@ td {
     padding:        3px;
 }
 
+hr {
+    width:          400px;
+}
+
 tr {
     height:         0px;
     padding:        3px;
+    vertical-align: center;
 }
 
 table#login {
