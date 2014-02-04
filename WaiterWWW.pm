@@ -403,7 +403,7 @@ sub session_status {
     my $trustee = Waiter::get_username($$session{trusteeid});
     my $user_key = Waiter::get_user_key($$session{waiterid});
     my $votes   = Waiter::get_votes($sessionid);
-    my $vote_url = "http://" . CGI::server_name() . "/votes.pl?$user_key";
+    my $vote_url = "http://" . CGI::server_name() . "/vote.pl?key=$user_key";
 
     my $html = "<p>You are waiting for $trustee";
     my $waited_time = abs($$session{start_time} - time);
@@ -441,7 +441,7 @@ sub session_status {
     </form>
 |;
     }
-    $html .= "<p>Voting Link: $vote_url</p>";
+    $html .= "<p>Voting Link: <a href='$vote_url'>$vote_url</a></p>";
 
     return $html;
 }
