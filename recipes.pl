@@ -76,13 +76,13 @@ sub recipe_modify_page {
     }
     # Create the drop down selectors for setting wait duration
     my $min_list = Waiter::WWW::time_dropdown(
-        'min','Minimum Duration:',$$recipe{min_time}
+        'min','Minimum Wait Time',$$recipe{min_time}
     );
     my $max_list = Waiter::WWW::time_dropdown(
-        'max','Maximum Duration:',$$recipe{max_time}
+        'max','Maximum Wait Time',$$recipe{max_time}
     );
     my $start_list = Waiter::WWW::time_dropdown(
-        'start','Start the Clock at:',$$recipe{start_time}
+        'start','Initial Wait Time',$$recipe{start_time}
     );
     # Create the checkboxes for voting options
     my $time_checkboxes = Waiter::WWW::time_checkboxes($$recipe{vote_times});
@@ -93,9 +93,6 @@ sub recipe_modify_page {
         $$recipe{start_rand},$$recipe{time_past},$$recipe{time_left}
     );
 
-    my $recipe_name = $$recipe{name};
-    my $recipe_sw   = $$recipe{safeword};
-
     Waiter::WWW::page_header($details,1);
     print qq|
     <form method='post'>
@@ -103,7 +100,7 @@ sub recipe_modify_page {
         <tr valign='center'>
           <td align='right'>Recipe Name:</td>
           <td align='left'>
-            <input type='text' name='name' value='$recipe_name'>
+            <input type='text' name='name' value='$$recipe{name}'>
           </td>
         </tr>
       </table>
@@ -131,7 +128,7 @@ sub recipe_modify_page {
           </td>
           <td>&nbsp;</td>
           <td align='left'>
-            <input type='text' size='15' value='$recipe_sw'>
+            <input type='text' name='safeword' value='$$recipe{safeword}'>
           </td>
         </tr>
         <tr valign='center'>
