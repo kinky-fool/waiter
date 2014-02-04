@@ -26,16 +26,34 @@ sub home_page {
     my $data    = shift;
     my $error   = shift || '';
 
-    my $information = Waiter::WWW::information_html($$data{user});
-    my $messages = Waiter::WWW::messages_html($data);
-    my $links = '';
+    my $status = qq|
+    <p>Welcome $$data{username}!</p>
+|;
 
-    Waiter::WWW::page_header('The Waiting Game Home Page',1);
+    my $userid = Waiter::get_userid($$data{username});
+    my $sessionid = Waiter::get_waiting_session($userid);
+    if ($sessionid) {
+        $status .= Waiter::WWW::session_status($sessionid);
+    } else {
+        $status .= qq|
+    <p>Enter a Recipe Key to Begin Waiting!</p>
+    <form method='post'>
+    <table class='options'>
+      </tr>
+        <td><input type='text' name='recipe_key'></td>
+        <td><input type='submit' name='begin' value='Begin Waiting'></td>
+      </tr>
+    </table>
+    </form>
+|;
+    }
+    my $messages = Waiter::WWW::messages_html($data);
+
+    Waiter::WWW::page_header('The Waiting Game',1);
 
     print qq{
-    $information
+    $status
     $messages
-    $links
 };
     Waiter::WWW::page_footer($error);
 }
