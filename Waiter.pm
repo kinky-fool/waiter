@@ -341,6 +341,45 @@ sub update_recipe {
     return;
 }
 
+sub start_session {
+    # Create a new session based off a provided recipe
+    my $userid  = shift;
+    my $recipe  = shift;
+
+    my $time    = time;
+
+    my $end_time = $$recipe{init_time} + $time;
+    my $rand_time = int(rand($$recipe{init_time} / 2));
+    if ($$recipe{init_rand} == 1) {
+        $end_time = ($rand_time * 2) + $time;
+    } elsif ($$recipe{init_rand} == 2) {
+        # Low End
+        $end_time = ($rand_time - int($$recipe{init_time} / 2)) + $time;
+    } elsif ($$recipe{init_rand} == 3) {
+        # High End
+        $end_time = ($rand_time + int($$recipe{init_time} / 2)) + $time;
+    }
+
+    my $session_key = make_key('sessions','session_key');
+
+    my $sql = qq| insert into sessions (session_key,trusteeid,waiterid,
+                start_time,end_time,min_time,max_time,min_votes,vote_times,
+                vote_cooldown,time_past,time_left,msg_times,safeword) values
+                (?,?,?,?,?,?,?,?,?,?,?,?,?,?) |;
+    my $dbh = db_connect();
+    my $sth = $dbh->prepare($sql);
+    my $rv = $sth->execute($session_key, $$recipe{ownerid}, $userid, $time,
+                    $end_time, $$recipe{min_time}, $$recipe{max_time},
+                    $$recipe{min_votes}, $$recipe{vote_times},
+                    $$recipe{vote_cooldown}, $$recipe{time_past},
+                    $$recipe{time_left}, $$recipe{msg_times},
+                    $$recipe{safeword});
+    if ($rv > 0) {
+        return 1;
+    }
+    return;
+}
+
 sub make_recipe {
     # Create a waiting recipe
     my $ownerid     = shift;

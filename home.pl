@@ -10,7 +10,24 @@ my $session = Waiter::WWW::load_session('Waiter');
 my $data = Waiter::WWW::read_params($session);
 
 if (Waiter::auth_user($$data{username},$$data{hash})) {
-    home_page($data);
+    my $info = '';
+    if ($$data{begin} and $$data{recipe_key} and $$data{recipe_key} ne '') {
+        my $userid = Waiter::get_userid($$data{username});
+        if (Waiter::get_waiting_session($userid)) {
+            $info = 'You are already waiting.';
+        } else {
+            if (my $recipe = Waiter::get_recipe_by_key($$data{recipe_key})) {
+                if (Waiter::start_session($userid,$recipe)) {
+                    $info = "Begin Waiting using Recipe: $$data{recipe_key}";
+                } else {
+                    $info = 'Failed to start session!';
+                }
+            } else {
+                $info = "Recipe: $$data{recipe_key} not found.";
+            }
+        }
+    }
+    home_page($data,$info);
 } else {
     # Non authenticated session, send to login page.
     print $session->header(
