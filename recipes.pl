@@ -85,9 +85,27 @@ sub recipe_modify_page {
     my $vote_options = Waiter::WWW::vote_options(
         $$recipe{min_votes},$$recipe{vote_cooldown},$$recipe{msg_times}
     );
-    my $misc_options = Waiter::WWW::misc_options(
-        $$recipe{init_rand},$$recipe{time_past},$$recipe{time_left}
+
+    my $init_rand_options = Waiter::WWW::radio_options(
+        'init_rand',$$recipe{init_rand},
+        "Don't Randomize Initial Time:ir:0",
+        "Random Initial Time (0 to Initial Time):ir:1",
+        "Random Initial Time; Low End:ir:2",
+        "Random Initial Time; High End:ir:3"
     );
+    my $time_past_options = Waiter::WWW::radio_options(
+        'time_past', $$recipe{time_past},
+        "Show Time Spent Waiting:tp:1",
+        "Show Approximate Time Spent Waiting:tp:2",
+        "Hide Time Spent Waiting:tp:0"
+    );
+    my $time_left_options = Waiter::WWW::radio_options(
+        'time_left', $$recipe{time_left},
+        "Show Time Remaining:tl:1",
+        "Show Approximate Time Remaining:tl:2",
+        "Hide Time Remaining:tl:0"
+    );
+
 
     Waiter::WWW::page_header($details,1);
     print qq|
@@ -115,7 +133,17 @@ sub recipe_modify_page {
         $vote_options
       </table>
       <hr/>
-      $misc_options
+      <table class='options'>
+        $init_rand_options
+      </table>
+      <hr/>
+      <table class='options'>
+        $time_past_options
+      </table>
+      <hr/>
+      <table class='options'>
+        $time_left_options
+      </table>
       <hr/>
       <table class='options'>
         <tr valign='center'>

@@ -85,8 +85,17 @@ sub session_modify_page {
     my $vote_options = Waiter::WWW::vote_options(
         $$session{min_votes},$$session{vote_cooldown},$$session{msg_times}
     );
-    my $misc_options = Waiter::WWW::misc_options(
-        $$session{init_rand},$$session{time_past},$$session{time_left}
+    my $time_past_options = Waiter::WWW::radio_options(
+        'time_past', $$session{time_past},
+        "Show Time Spent Waiting:tp:1",
+        "Show Approximate Time Spent Waiting:tp:2",
+        "Hide Time Spent Waiting:tp:0"
+    );
+    my $time_left_options = Waiter::WWW::radio_options(
+        'time_left', $$session{time_left},
+        "Show Time Remaining:tl:1",
+        "Show Approximate Time Remaining:tl:2",
+        "Hide Time Remaining:tl:0"
     );
 
     Waiter::WWW::page_header($details,1);
@@ -129,7 +138,13 @@ sub session_modify_page {
         $vote_options
       </table>
       <hr/>
-      $misc_options
+      <table class='options'>
+        $time_past_options
+      </table>
+      <hr/>
+      <table class='options'>
+        $time_left_options
+      </table>
       <hr/>
       <table class='options'>
         <tr valign='center'>
@@ -171,7 +186,6 @@ sub session_list_page {
         $html .= qq|
     <tr valign='center'>
       <td align='left'>$key</td>
-      <td align='left'>$name</td>
       <td align='left'>$waiter</td>
       <td align='right'><a href='sessions.pl?session=$key'>Modify</a>
     </tr>
@@ -182,14 +196,12 @@ sub session_list_page {
     <tr valign='top'>
       <td>No Sessions Found</td>
       <td>&nbsp;</td>
-      <td>&nbsp;</td>
     </tr>
 |;
     } else {
         $html = qq|
     <tr valign='center'>
       <td align='left'>Session Key</td>
-      <td align='left'>Session Name</td>
       <td align='left'>Waiter Name</td>
       <td>&nbsp;</td>
     </tr>
