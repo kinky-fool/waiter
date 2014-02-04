@@ -95,8 +95,8 @@ sub prepare_recipe {
     my $userid = Waiter::get_userid($$data{username});
 
     # Convert dropdown times to seconds
-    my $start_time = Waiter::convert_to_seconds(
-        $$data{weeks_start},$$data{days_start},$$data{hours_start}
+    my $init_time = Waiter::convert_to_seconds(
+        $$data{weeks_init},$$data{days_init},$$data{hours_init}
     );
     my $min_time = Waiter::convert_to_seconds(
         $$data{weeks_min},$$data{days_min},$$data{hours_min}
@@ -127,7 +127,7 @@ sub prepare_recipe {
     }
 
     return ($userid,$$data{recipe_key},$$data{name},$min_time,$max_time,
-            $start_time,$$data{start_rand},$min_votes,$vote_times,
+            $init_time,$$data{init_rand},$min_votes,$vote_times,
             $$data{cooldown},$$data{time_past},$$data{time_left},$msg_times,
             $$data{safeword});
 }
@@ -247,6 +247,10 @@ sub time_checkboxes {
 
     my %adds = ();
     my %subs = ();
+    for my $i (0 .. 12) {
+        $adds{$i} = '';
+        $subs{$i} = '';
+    }
     foreach my $time (split(/:/,$times)) {
         if ($time =~ /^[0-9-]+$/) {
             if ($time > 0) {
@@ -323,49 +327,53 @@ sub vote_options {
 }
 
 sub misc_options {
-    my $start_rand  = shift;
+    my $init_rand   = shift;
     my $time_past   = shift;
     my $time_left   = shift;
     my $safeword    = shift;
 
-    my %ck = (
-        "sr$start_rand" => ' checked',
-        "tp$time_past"  => ' checked',
-        "tl$time_left"  => ' checked',
-    );
+    my %ck = ();
+    for my $i (0 .. 10) {
+        $ck{"ir$i"} = '';
+        $ck{"tp$i"} = '';
+        $ck{"tl$i"} = '';
+    }
+    $ck{"ir$init_rand"} = ' checked';
+    $ck{"tp$time_past"} = ' checked';
+    $ck{"tl$time_left"} = ' checked';
 
     my $html = qq|
     <table class='options'>
       <tr valign='center'>
         <td align='left'>
-          <label for='sr0'>Don't Randomize Start Time</label>
+          <label for='sr0'>Don't Randomize Initial Time</label>
         </td>
         <td align='right'>
-          <input type='radio' id='sr0' name='start_rand' value='0' $ck{sr0} />
+          <input type='radio' id='ir0' name='init_rand' value='0' $ck{ir0} />
         </td>
       </tr>
       <tr valign='center'>
         <td align='left'>
-          <label for='sr1'>Random Start Time (Zero to Start Time)</label>
+          <label for='sr1'>Random Initial Time (0 to Initial Time)</label>
         </td>
         <td align='right'>
-          <input type='radio' id='sr1' name='start_rand' value='1' $ck{sr1} />
+          <input type='radio' id='ir1' name='init_rand' value='1' $ck{ir1} />
         </td>
       </tr>
       <tr valign='center'>
         <td align='left'>
-          <label for='sr2'>Random Start Time; Low End of Start Time</label>
+          <label for='sr2'>Random Initial Time; Low End</label>
         </td>
         <td align='right'>
-          <input type='radio' id='sr2' name='start_rand' value='2' $ck{sr2} />
+          <input type='radio' id='ir2' name='init_rand' value='2' $ck{ir2} />
         </td>
       </tr>
       <tr valign='center'>
         <td align='left'>
-          <label for='sr3'>Random Start Time; High End of Start Time</label>
+          <label for='sr3'>Random Initial Time; High End</label>
         </td>
         <td align='right'>
-          <input type='radio' id='sr3' name='start_rand' value='3' $ck{sr3} />
+          <input type='radio' id='ir3' name='init_rand' value='3' $ck{ir3} />
         </td>
       </tr>
     </table>

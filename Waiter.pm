@@ -64,7 +64,7 @@ sub auth_user {
     my $hash    = shift;
 
     my $correct = get_hash($user);
-    if ($hash and ($hash eq $correct)) {
+    if ($correct and $hash and ($hash eq $correct)) {
         return 1;
     }
 
@@ -314,8 +314,8 @@ sub update_recipe {
     my $name            = shift;
     my $min_time        = shift;
     my $max_time        = shift;
-    my $start_time      = shift;
-    my $start_rand      = shift;
+    my $init_time       = shift;
+    my $init_rand       = shift;
     my $min_votes       = shift;
     my $vote_times      = shift;
     my $vote_cooldown   = shift;
@@ -325,13 +325,13 @@ sub update_recipe {
     my $safeword        = shift;
 
     my $sql = qq| update recipes set name = ?, min_time = ?, max_time = ?,
-                start_time = ?, start_rand = ?, min_votes = ?, vote_times = ?,
+                init_time = ?, init_rand = ?, min_votes = ?, vote_times = ?,
                 vote_cooldown = ?, time_past = ?, time_left = ?,
                 msg_times = ?, safeword = ?
                 where recipe_key = ? and ownerid = ? |;
     my $dbh = db_connect();
     my $sth = $dbh->prepare($sql);
-    my $rv = $sth->execute($name,$min_time,$max_time,$start_time,$start_rand,
+    my $rv = $sth->execute($name,$min_time,$max_time,$init_time,$init_rand,
                             $min_votes,$vote_times,$vote_cooldown,$time_past,
                             $time_left,$msg_times,$safeword,$recipe_key,
                             $ownerid);
@@ -347,8 +347,8 @@ sub make_recipe {
     my $name        = shift;
     my $min_time    = shift;
     my $max_time    = shift;
-    my $start_time  = shift;
-    my $start_rand  = shift;
+    my $init_time   = shift;
+    my $init_rand   = shift;
     my $min_votes   = shift;
     my $vote_times  = shift;
     my $time_past   = shift;
@@ -358,13 +358,13 @@ sub make_recipe {
 
     my $dbh = db_connect();
     my $sql = qq| insert into recipes (ownerid, recipe_key, name,
-                    min_time, max_time, start_time, start_rand,
+                    min_time, max_time, init_time, init_rand,
                     min_votes, vote_times, time_past, time_left)
                     values (?,?,?,?,?,?,?,?,?,?,?) |;
     my $sth = $dbh->prepare($sql);
-    my $rv = $sth->execute($ownerid, $recipe_key, $name,
-                    $min_time, $max_time, $start_time, $start_rand,
-                    $min_votes, $vote_times, $time_past, $time_left);
+    my $rv = $sth->execute($ownerid, $recipe_key, $name, $min_time, $max_time,
+                    $init_time, $init_rand, $min_votes, $vote_times, $time_past,
+                    $time_left);
     $sth->finish();
     $dbh->disconnect();
 
@@ -396,17 +396,11 @@ sub get_end_time {
     my $sessionid   = shift;
 
     my $dbh = db_connect();
-    my $sql = qq| select start_time,end_time,recipeid from sessions
+    my $sql = qq| select start_time,end_time,max_time from sessions
                     where sessionid = ? |;
     my $sth = $dbh->prepare($sql);
     $sth->execute($sessionid);
-    my ($start_time,$end_time,$recipeid) = $sth->fetchrow_array();
-    $sth->finish();
-
-    $sql = qq| select max_time from recipes where recipeid = ? |;
-    $sth = $dbh->prepare($sql);
-    $sth->execute($recipeid);
-    my ($max_time) = $sth->fetchrow_array();
+    my ($start_time,$end_time,$max_time) = $sth->fetchrow_array();
     $sth->finish();
     $dbh->disconnect();
 

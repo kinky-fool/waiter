@@ -81,8 +81,8 @@ sub recipe_modify_page {
     my $max_list = Waiter::WWW::time_dropdown(
         'max','Maximum Wait Time',$$recipe{max_time}
     );
-    my $start_list = Waiter::WWW::time_dropdown(
-        'start','Initial Wait Time',$$recipe{start_time}
+    my $init_list = Waiter::WWW::time_dropdown(
+        'init','Initial Wait Time',$$recipe{init_time}
     );
     # Create the checkboxes for voting options
     my $time_checkboxes = Waiter::WWW::time_checkboxes($$recipe{vote_times});
@@ -90,7 +90,7 @@ sub recipe_modify_page {
         $$recipe{min_votes},$$recipe{vote_cooldown},$$recipe{msg_times}
     );
     my $misc_options = Waiter::WWW::misc_options(
-        $$recipe{start_rand},$$recipe{time_past},$$recipe{time_left}
+        $$recipe{init_rand},$$recipe{time_past},$$recipe{time_left}
     );
 
     Waiter::WWW::page_header($details,1);
@@ -106,7 +106,7 @@ sub recipe_modify_page {
       </table>
       <hr/>
       <table class='options'>
-        $start_list
+        $init_list
         $min_list
         $max_list
       </table>
