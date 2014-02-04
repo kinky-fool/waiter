@@ -490,11 +490,20 @@ sub information_html {
 
 sub messages_html {
     # Produce a block of HTML to display messages for a user
-    my $user    = shift;
+    my $userid    = shift;
 
-    my $userid = Waiter::get_userid($user);
-    my $messages = '';
-    return $messages;
+    my $messages = Waiter::get_messages($userid);
+    my $html = '';
+    foreach my $id (sort keys %$messages) {
+        $html .= qq|
+        <tr>
+          <td>$$messages{$id}{time}</td>
+          <td>$$messages{$id}{sender}</td>
+          <td>$$messages{$id}{message}</td>
+        </tr>
+|;
+    }
+    return $html;
 }
 
 1;
