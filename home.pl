@@ -68,9 +68,9 @@ sub home_page {
 
     Waiter::WWW::page_header('The Waiting Game',1);
 
-    print qq{
+    print qq|
     $status
     $messages
-};
+|;
     Waiter::WWW::page_footer($error);
 }
