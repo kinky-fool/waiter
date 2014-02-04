@@ -13,6 +13,8 @@ create table users (
     email           varchar(64) not null default 'unset',
     verified        boolean not null default 0,
     about_me        varchar(512),
+    waited_time     int unsigned,
+    longest_wait    int unsigned,
     primary key (userid)
 );
 
@@ -38,8 +40,8 @@ create table recipes (
 create table sessions (
     sessionid       int unsigned not null auto_increment,
     session_key     varchar(16) not null,
-    holderid        int unsigned not null,
-    wearerid        int unsigned not null,
+    trusteeid       int unsigned not null,
+    waiterid        int unsigned not null,
     finished        boolean not null default 0,
     start_time      int unsigned not null,
     end_time        int unsigned not null,
@@ -68,7 +70,7 @@ create table votes (
 create table messages (
     messageid       int unsigned not null auto_increment,
     to_id           int unsigned not null,
-    from_id         int unsigned not null,
+    sender          int unsigned not null,
     time            int unsigned not null,
     message         text,
     primary key (messageid)
