@@ -26,13 +26,12 @@ table.options {
 div.status {
     margin:         10px auto;
     overflow:       hidden;
-    width:          500px;
+    width:          450px;
 }
 
 span.left {
     float:          left;
     text-align:     left;
-    width:          200px;
 }
 
 span.right {
