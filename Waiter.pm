@@ -291,13 +291,14 @@ sub get_votes {
 
 sub last_vote_time_by_ip {
     # Return the timestamp of an IPs last vote, or 0
-    my $ip  = shift;
+    my $ip          = shift;
+    my $sessionid   = shift;
 
-    my $sql = qq| select time from votes where ip = ?
+    my $sql = qq| select time from votes where ip = ? and sessionid = ?
                     order by time desc limit 1 |;
     my $dbh = db_connect();
     my $sth = $dbh->prepare($sql);
-    $sth->execute($ip);
+    $sth->execute($ip,$sessionid);
     my ($time) = $sth->fetchrow_array();
     $sth->finish();
     $dbh->disconnect();
@@ -564,14 +565,14 @@ sub make_recipe {
 
 sub update_end_time {
     # Adjust the remaining time of a session
-    my $session_key = shift;
+    my $sessionid   = shift;
     my $adjustment  = shift;
 
     my $sql = qq| update sessions set end_time = end_time + ?
-                        where session_key = ? |;
+                        where sessionid = ? |;
     my $dbh = db_connect();
     my $sth = $dbh->prepare($sql);
-    my $rv = $sth->execute($adjustment, $session_key);
+    my $rv = $sth->execute($adjustment,$sessionid);
     $sth->finish();
     $dbh->disconnect();
 
@@ -681,6 +682,9 @@ sub human_time {
         $seconds, ($seconds==1)?"second":"seconds");
     }
 
+    if ($time < 0) {
+        $output = "-$output";
+    }
     return $output;
 }
 
