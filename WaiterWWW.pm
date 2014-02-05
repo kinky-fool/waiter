@@ -398,11 +398,22 @@ sub radio_options {
 
 sub vote_choice {
     # Generate dropdown to present to voters
-    my $vtimes  = shift;
+    my $vtimes      = shift;
+    my $waiter      = shift;
+    my $user_key    = shift;
 
     my @times = sort {$a <=> $b} (split/:/,$vtimes);
     my $select = $times[rand(@times)];
     my $html = qq|
+    <form method='post'>
+    <div class='status'>
+      <span class='left'>
+        Let $waiter know who to thank or curse:
+      </span>
+      <span class='right'>
+        <input type='text' size='13' name='voter_name' value='anonymous'>
+      </span>
+    </div>
     <div class='status'>
       <span class='left'>
         <select name='vote_choice'>|;
@@ -425,9 +436,11 @@ sub vote_choice {
         </select>
       </span>
       <span class='right'>
+        <input type='hidden' name='key' value='$user_key'>
         <input type='submit' name='cast_vote' value='Cast Your Vote'>
       </span>
     </div>
+    </form>
 |;
     return $html;
 }
