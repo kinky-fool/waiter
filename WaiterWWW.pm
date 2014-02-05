@@ -73,25 +73,20 @@ sub read_params {
         $data{hash} = Waiter::make_hash($data{username},$data{password});
         delete $data{password};
     }
-    return \%data;
-}
 
-sub save_session {
-    # Take in the settings hash and store them in the session
-    my $session = shift;
-    my $data    = shift;
-
-    # Clear the params
-    $session->clear();
-    if ($$data{username} and ($$data{username} ne '')) {
-        $session->param('username', $$data{username});
+    $data{authenticated} = 0;
+    if ($data{username} and $data{username} ne '' and
+        $data{hash} and $data{hash} ne '' and
+        Waiter::auth_user($data{username},$data{hash})) {
+        # Log user in
+        $data{authenticated} = 1;
+        $session->param('username', $data{username});
+        $session->param('hash', $data{hash});
+        $session->expire('~logged-in', '1w');
     }
-    if ($$data{hash} and ($$data{hash} ne '')) {
-        $session->param('hash', $$data{hash});
-    }
-    $session->expire('~logged-in', '1w');
-
     $session->flush();
+
+    return \%data;
 }
 
 sub prepare_recipe {
