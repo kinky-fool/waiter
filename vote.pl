@@ -65,15 +65,17 @@ sub voting_page {
         }
     }
 
-    my $last_voted = Waiter::last_vote_time_by_ip(
-                        $$data{REMOTE_ADDR},$sessionid);
+    # Openshift does some weird stuff to IPs
+    my $ip = $$data{HTTP_X_CLIENT_IP};
+    $ip = $$data{REMOTE_ADDR} unless ($ip and $ip ne '');
+
+    my $last_voted = Waiter::last_vote_time_by_ip($ip,$sessionid);
     my $cooldown = $$session{vote_cooldown} * 60 * 60;
     my $vote_html = '';
     if (abs($last_voted - time) > $cooldown) {
         if ($$data{cast_vote} and ($vote_time != 0)) {
             my $seconds = $vote_time * 60 * 60;
-            Waiter::cast_vote($sessionid,$$data{REMOTE_ADDR},$seconds,
-                               $$data{voter_name});
+            Waiter::cast_vote($sessionid,$ip,$seconds,$$data{voter_name});
             my $verb = 'Increased';
             if ($vote_time < 0) {
                 $verb = 'Decreased';
