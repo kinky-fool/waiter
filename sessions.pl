@@ -14,6 +14,7 @@ if (Waiter::auth_user($$data{username},$$data{hash})) {
     my $userid = Waiter::get_userid($$data{username});
     if ($$data{session} and ($$data{session} ne '')) {
         $$data{session_key} = $$data{session};
+        my $sessionid = Waiter::get_sessionid($$data{session_key});
         if (Waiter::is_session_owner($userid,$$data{session_key})) {
             session_modify_page($$data{session_key});
         } else {
@@ -37,7 +38,8 @@ if (Waiter::auth_user($$data{username},$$data{hash})) {
             $mod_time = $mod_time * -1;
             $direction = 'Decreased';
         }
-        if (Waiter::update_end_time($$data{session_key},$mod_time)) {
+        my $sessionid = Waiter::get_sessionid($$data{session_key});
+        if (Waiter::update_end_time($sessionid,$mod_time)) {
             session_list_page("$$data{session_key}: $direction time by $time");
         }
     } else {
@@ -62,8 +64,8 @@ sub session_modify_page {
     my $details = "Editing Session: '$session_key' Waiter: $waiter";
     my $time = time;
     my $session_start = strftime("%F %T",localtime($$session{start_time}));
-    my $waited_secs = abs($$session{start_time} - time);
-    my $remain_secs = abs($$session{end_time} - time);
+    my $waited_secs = time - $$session{start_time};
+    my $remain_secs = $$session{end_time} - time;
     my $waited_time = Waiter::human_time($waited_secs);
     my $remain_time = Waiter::human_time($remain_secs);
 
