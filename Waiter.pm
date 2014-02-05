@@ -89,6 +89,23 @@ sub get_userid {
     return;
 }
 
+sub get_sessionid {
+    # Lookup sessionid by session_key
+    my $session_key = shift;
+
+    my $sql = qq| select sessionid from sessions where session_key = ? |;
+    my $dbh = db_connect();
+    my $sth = $dbh->prepare($sql);
+    $sth->execute($session_key);
+    my ($sessionid) = $sth->fetchrow_array();
+    $sth->finish();
+    $dbh->disconnect();
+    if ($sessionid and ($sessionid ne '')) {
+        return $sessionid;
+    }
+    return;
+}
+
 sub get_userid_by_key {
     # Return a user's id provided the unique user_key
     my $user_key    = shift;
@@ -560,6 +577,27 @@ sub update_end_time {
 
     # Return 1 if the time warp was successful
     return 1 if ($rv > 0);
+    return;
+}
+
+sub cast_vote {
+    my $sessionid   = shift;
+    my $ip          = shift;
+    my $adjustment  = shift;
+    my $name        = shift;
+
+    if (update_end_time($sessionid,$adjustment)) {
+        my $sql = qq| insert into votes (sessionid,ip,time,vote,voter_name)
+                    values (?, ?, ?, ?, ?) |;
+        my $dbh = db_connect();
+        my $sth = $dbh->prepare($sql);
+        my $rv = $sth->execute($sessionid,$ip,time,$adjustment,$name);
+        $sth->finish();
+        $dbh->disconnect();
+        if ($rv > 0) {
+            return 1;
+        }
+    }
     return;
 }
 
