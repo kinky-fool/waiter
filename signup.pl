@@ -17,7 +17,6 @@ if ($$data{action} and ($$data{action} eq 'create')) {
                                 $$data{username},$$data{pass0});
                 delete $$data{pass0};
                 delete $$data{pass1};
-                Waiter::WWW::save_session($session,$data);
                 Waiter::WWW::login($session);
             } else {
                 sign_up_page('',"Failed to create user $$data{username}.");
@@ -32,7 +31,6 @@ if ($$data{action} and ($$data{action} eq 'create')) {
     sign_up_page('','');
 }
 
-Waiter::WWW::save_session($session,$data);
 exit;
 
 sub sign_up_page {

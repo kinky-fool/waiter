@@ -35,7 +35,6 @@ if (Waiter::auth_user($$data{username},$$data{hash})) {
     );
 }
 
-Waiter::WWW::save_session($session, $data);
 exit;
 
 sub home_page {

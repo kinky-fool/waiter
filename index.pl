@@ -28,7 +28,6 @@ if ($session->is_expired) {
     Waiter::WWW::logout($session);
 }
 
-Waiter::WWW::save_session($session, $data);
 exit;
 
 sub login_page {

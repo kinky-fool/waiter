@@ -10,7 +10,7 @@ use POSIX qw/strftime/;
 my $session = Waiter::WWW::load_session('Waiter');
 my $data = Waiter::WWW::read_params($session);
 
-if (Waiter::auth_user($$data{username},$$data{hash})) {
+if ($$data{authenticated}) {
     my $userid = Waiter::get_userid($$data{username});
     if ($$data{session} and ($$data{session} ne '')) {
         $$data{session_key} = $$data{session};
@@ -52,7 +52,6 @@ if (Waiter::auth_user($$data{username},$$data{hash})) {
     );
 }
 
-Waiter::WWW::save_session($session, $data);
 exit;
 
 sub session_modify_page {

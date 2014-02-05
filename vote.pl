@@ -27,7 +27,6 @@ if ($$data{key}) {
     simple_page("No user information provided.");
 }
 
-Waiter::WWW::save_session($session, $data);
 exit;
 
 sub simple_page {
