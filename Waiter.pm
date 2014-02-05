@@ -11,7 +11,7 @@ package Waiter;
 my $db_user = 'waiter';
 my $db_pass = 'patience';
 my $db_name = 'waiting_game';
-my $db_host = 'localhost';
+my $db_host = $ENV{OPENSHIFT_MYSQL_DB_HOST} || 'localhost';
 
 sub db_connect {
     my $dsn = "dbi:mysql:database=$db_name;host=$db_host";
