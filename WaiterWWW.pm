@@ -16,7 +16,7 @@ sub login {
     if ($session->is_empty) {
         $session = $session->new() or die $session->errstr;
     }
-    $session->expire('~logged-in', '30m');
+    $session->expire('~logged-in', '1w');
     $session->flush();
 
     my $cgi = CGI->new;
@@ -89,7 +89,7 @@ sub save_session {
     if ($$data{hash} and ($$data{hash} ne '')) {
         $session->param('hash', $$data{hash});
     }
-    $session->expire('~logged-in', '30m');
+    $session->expire('~logged-in', '1w');
 
     $session->flush();
 }
