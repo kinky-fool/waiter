@@ -13,6 +13,8 @@ if ($$data{action} and ($$data{action} eq 'create')) {
     if ($$data{pass0} and $$data{pass1} and $$data{username}) {
         if ($$data{pass0} eq $$data{pass1}) {
             if (Waiter::make_user($$data{username},$$data{pass0})) {
+                $$data{hash} = Waiter::make_hash(
+                                $$data{username},$$data{pass0});
                 delete $$data{pass0};
                 delete $$data{pass1};
                 Waiter::WWW::save_session($session,$data);
