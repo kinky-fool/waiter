@@ -9,7 +9,7 @@ use WaiterWWW;
 my $session = Waiter::WWW::load_session('Waiter');
 my $data = Waiter::WWW::read_params($session);
 
-if (Waiter::auth_user($$data{username},$$data{hash})) {
+if ($$data{authenticated}) {
     my $info = '';
     if ($$data{begin} and $$data{recipe_key} and $$data{recipe_key} ne '') {
         my $userid = Waiter::get_userid($$data{username});
@@ -25,6 +25,12 @@ if (Waiter::auth_user($$data{username},$$data{hash})) {
             } else {
                 $info = "Recipe: $$data{recipe_key} not found.";
             }
+        }
+    } elsif ($$data{finish}) {
+        if (Waiter::finish_session($$data{sessionid})) {
+            $info = "Your session has been finished!";
+        } else {
+            $info = "Hah, nice try.";
         }
     }
     home_page($data,$info);
@@ -63,7 +69,7 @@ sub home_page {
     </form>
 |;
     }
-    my $messages = Waiter::WWW::messages_html($data);
+    my $messages = Waiter::WWW::messages_html($userid);
 
     Waiter::WWW::page_header('The Waiting Game',1);
 
