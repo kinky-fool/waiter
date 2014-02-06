@@ -3,7 +3,7 @@ body {
     font-size:      11pt;
     text-align:     center;
     background:     none repeat scroll 0 0 #000000;
-    color:          #FFF;
+    color:          #EEE;
 }
 
 div#container {
@@ -54,6 +54,39 @@ tr {
     vertical-align: center;
 }
 
+table#msgs {
+    color:          #BBB;
+    width:          50%;
+    margin:         0 auto;
+}
+
+table#msgs tr:nth-child(even) {
+    vertical-align: center;
+    background:     #222;
+}
+
+table#msgs tr:nth-child(odd) {
+    vertical-align: center;
+    background:     #333;
+}
+
+td.time {
+    width:          150px;
+    font-family:    courier-new;
+    font-size:      10px;
+    text-align:     center;
+}
+
+td.from {
+    width:          100px;
+    text-align:     left;
+}
+
+td.text {
+    text-align:     left;
+}
+
+
 table#login {
     margin:         auto auto;
 }
@@ -85,11 +118,4 @@ a:link {
 a:visited {
     color:          #DDD;
     text-decoration: none;
-}
-
-
-p#warning {
-    font-size:      18px;
-    color:          #FA0080;
-    font-weight:    bolder;
 }
