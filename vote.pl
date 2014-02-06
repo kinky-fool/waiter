@@ -113,6 +113,11 @@ sub voting_page {
         $time_left = 'Wait is over, voting is still possible.';
     }
 
+    my $min_time = $$session{start_time} + $$session{min_time};
+    my $max_time = $$session{start_time} + $$session{max_time};
+    $min_time = POSIX::strftime("%F %T %Z",localtime($min_time));
+    $max_time = POSIX::strftime("%F %T %Z",localtime($max_time));
+
     my $status_html = qq|
     <div class='status'>
     <span class='left'>$waiter Has Waited:</span>
@@ -122,27 +127,35 @@ sub voting_page {
     <span class='left'>Time Remaining:</span>
     <span class='right'>$time_left</span>
     </div>
+    <div class='status'>
+    <span class='left'>Earliest Possible End:</span>
+    <span class='right'>$min_time</span>
+    </div>
+    <div class='status'>
+    <span class='left'>Latest Possible End:</span>
+    <span class='right'>$max_time</span>
+    </div>
 |;
-
-
 
     my $min_votes = '';
     if ($$session{min_votes} > $vote_count) {
         my $votes_needed = $$session{min_votes} - $vote_count;
-        $min_votes .= qq|
-        <div class='status'>
-        <span class='left'>
-          $waiter needs $votes_needed votes to finish waiting.
-        </span>|;
+        $min_votes = sprintf("%s %s %s","$waiter needs $votes_needed",
+                            ($votes_needed==1)?"person":"people",
+                            "to vote to finish waiting.");
+        $min_votes = qq|
+    <br/>
+    <p>$min_votes</p>
+    <br/>
+|;
     }
 
     Waiter::WWW::page_header('Waiting Game Voting',1);
     print qq|
     $status_html
-    <br/>
+    $min_votes
     $vote_html
     <br/>
-    $min_votes
 |;
     Waiter::WWW::page_footer();
 }
