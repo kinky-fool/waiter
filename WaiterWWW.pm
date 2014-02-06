@@ -6,6 +6,7 @@ use warnings;
 use CGI qw/:standard/;
 use CGI::Carp qw/fatalsToBrowser/;
 use CGI::Session qw/-ip_match/;
+use POSIX qw(strftime);
 
 package Waiter::WWW;
 
@@ -449,40 +450,69 @@ sub session_status {
     my $votes   = Waiter::get_votes($sessionid);
     my $vote_url = "http://" . CGI::server_name() . "/vote.pl?key=$user_key";
 
-    my $html = "<p>You are waiting for $trustee";
+    my $html = qq|
+        <p>$trustee is your trustee and overseeing your wait.</p>
+        <br/>
+|;
+
     my $waited_time = abs($$session{start_time} - time);
-    if ($$session{time_past} > 0) {
-        my $waited = Waiter::human_time($waited_time);
-        if ($$session{time_past} == 2) {
-            $waited = Waiter::approx_time($waited_time);
-        }
-        $html .= "<p>You have been waiting $waited.</p>";
+    my $time_past = 'Information hidden by session settings.';
+    if ($$session{time_past} == 1) {
+        $time_past = Waiter::human_time($waited_time);
+    } elsif ($$session{time_past} == 2) {
+        $time_past = Waiter::approx_time($waited_time);
     }
 
-    my $remaining = $$session{end_time} - time;
-    if ($remaining > 0) {
-        if ($$session{time_left} > 0) {
-            my $time_left = Waiter::human_time($remaining);
-            if ($$session{time_left} == 2) {
-                $time_left = Waiter::approx_time($remaining);
-            }
-            $html .= "<p>You must wait $time_left longer.</p>";
-        } else {
-            $html .= "<p>You must continue waiting.</p>";
-        }
-    } else {
-        $remaining = 0;
+    my $remain_time = $$session{end_time} - time;
+    my $time_left = 'Information hidden by session settings.';
+    if ($$session{time_left} == 1) {
+        $time_left = Waiter::human_time($remain_time);
+    } elsif ($$session{time_left} == 2) {
+        $time_left = Waiter::approx_time($remain_time);
     }
-    if ($$session{min_votes} > $votes) {
+
+    my $min_time = $$session{start_time} + $$session{min_time};
+    my $max_time = $$session{start_time} + $$session{max_time};
+    $min_time = POSIX::strftime("%F %T %Z",localtime($min_time));
+    $max_time = POSIX::strftime("%F %T %Z",localtime($max_time));
+
+    $html .= qq|
+    <div class='status'>
+    <span class='left'>You have waited:</span>
+    <span class='right'>$time_past</span>
+    </div>
+    <div class='status'>
+    <span class='left'>Time Remaining:</span>
+    <span class='right'>$time_left</span>
+    </div>
+    <div class='status'>
+    <span class='left'>Earliest Possible End:</span>
+    <span class='right'>$min_time</span>
+    </div>
+    <div class='status'>
+    <span class='left'>Latest Possible End:</span>
+    <span class='right'>$max_time</span>
+    </div>
+    <br/>
+|;
+
+    my $min_votes = '';
+    if ($$session{min_votes} >= $votes) {
         my $votes_needed = $$session{min_votes} - $votes;
-        $html .= qq|<p>$votes_needed people need to vote
-                    before you may end your wait.</p>|;
-    } elsif ($remaining == 0) {
+        $min_votes = sprintf("%s %s %s","You need $votes_needed",
+                            ($votes_needed==1)?"person":"people",
+                            "to vote to finish waiting.");
+        $html .= qq|
+        <p>$min_votes</p>
+|;
+    } elsif ($remain_time < 1 and $waited_time > $$session{min_time}) {
         $html .= qq|
     <p>Your wait is over!</p>
     <form method='post'>
+    <input type='hidden' name='sessionid' value='$sessionid' />
     <input type='submit' name='finish' value='End Wait!'/>
     </form>
+    <br/>
 |;
     }
     $html .= "<p>Voting Link: <a href='$vote_url'>$vote_url</a></p>";
