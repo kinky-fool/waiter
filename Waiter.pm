@@ -318,8 +318,7 @@ sub get_messages {
     $sth->execute($userid);
     my $messages = $sth->fetchall_hashref('messageid');
     foreach my $id (keys %$messages) {
-        $$messages{$id}{time} = POSIX::strftime("%F %T",
-                localtime($$messages{$id}{time}));
+        $$messages{$id}{from} = get_display_name($$messages{$id}{sender});
     }
     $sth->finish();
     $dbh->disconnect();
@@ -526,6 +525,41 @@ sub start_session {
                     $$recipe{time_left}, $$recipe{msg_times},
                     $$recipe{safeword});
     if ($rv > 0) {
+        my $waiter = get_display_name($userid);
+        my $time = "Initial wait: " . human_time($end_time - $time);
+        my $message = "$waiter used recipe $$recipe{recipe_key}. $time";
+        message($$recipe{ownerid},0,$message);
+        $message = "You used recipe $$recipe{recipe_key} to begin waiting";
+        message($userid,0,$message);
+        return 1;
+    }
+    return;
+}
+
+sub finish_session {
+    my $sessionid   = shift;
+
+    my $session = get_session($sessionid);
+
+    my $remain_time = $$session{end_time} - time;
+    my $waited = time - $$session{start_time};
+    my $votes = get_votes($sessionid);
+
+    if ($votes >= $$session{min_votes} and
+        $remain_time < 1 and
+        $waited > $$session{min_time}) {
+        my $sql = qq| update sessions set finished=1 where sessionid = ?
+                    and finished = 0 |;
+        my $dbh = db_connect();
+        my $sth = $dbh->prepare($sql);
+        my $rv = $sth->execute($sessionid);
+        $sth->finish();
+        $dbh->disconnect();
+        if ($rv > 0) {
+            my $waiter = get_display_name($$session{waiterid});
+            message($$session{trusteeid},0,"$waiter Ended Wait Session");
+            message($$session{waiterid},0,"Ended Wait Session");
+        }
         return 1;
     }
     return;
@@ -581,11 +615,30 @@ sub update_end_time {
     return;
 }
 
+sub message {
+    my $to      = shift;
+    my $from    = shift;
+    my $message = shift;
+
+    my $sql = qq| insert into messages
+                (to_id,sender,time,message) values (?, ?, ?, ?) |;
+    my $dbh = db_connect();
+    my $sth = $dbh->prepare($sql);
+    my $rv = $sth->execute($to,$from,time,$message);
+    if ($rv > 0) {
+        return 1;
+    }
+    logger("Failed to store message: '$to', '$from', '$message'");
+    return;
+}
+
 sub cast_vote {
     my $sessionid   = shift;
     my $ip          = shift;
     my $adjustment  = shift;
     my $name        = shift;
+
+    my $session = get_session($sessionid);
 
     if (update_end_time($sessionid,$adjustment)) {
         my $sql = qq| insert into votes (sessionid,ip,time,vote,voter_name)
@@ -596,6 +649,18 @@ sub cast_vote {
         $sth->finish();
         $dbh->disconnect();
         if ($rv > 0) {
+            my $verb = 'Increased';
+            if ($adjustment < 0) {
+                $verb = 'Decreased';
+            }
+            my $hours = abs($adjustment / (60*60));
+            my $message = sprintf("%s %d %s","$name $verb Wait by",
+                        $hours,($hours==1)?"hour":"hours");
+            message($$session{trusteeid},0,$message);
+            if ($$session{msg_times} == 0) {
+                $message = "$name $verb Wait";
+            }
+            message($$session{waiterid},0,$message);
             return 1;
         }
     }
