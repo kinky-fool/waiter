@@ -525,16 +525,22 @@ sub messages_html {
     my $userid    = shift;
 
     my $messages = Waiter::get_messages($userid);
-    my $html = '';
-    foreach my $id (sort keys %$messages) {
+    return '' unless ($messages);
+    my @sorted = sort { $$messages{$b}{time} cmp $$messages{$a}{time} }
+                    keys %$messages;
+    my $html = qq|<table id='msgs'>|;
+    foreach my $id (@sorted) {
+        my $date = POSIX::strftime("%F",localtime($$messages{$id}{time}));
+        my $time = POSIX::strftime("%T",localtime($$messages{$id}{time}));
         $html .= qq|
         <tr>
-          <td>$$messages{$id}{time}</td>
-          <td>$$messages{$id}{sender}</td>
-          <td>$$messages{$id}{message}</td>
+          <td class='time'>$time $date</td>
+          <td class='from'>$$messages{$id}{from}</td>
+          <td class='text'>$$messages{$id}{message}</td>
         </tr>
 |;
     }
+    $html .= qq|</table>|;
     return $html;
 }
 
