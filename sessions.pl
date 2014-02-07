@@ -18,14 +18,15 @@ if ($$data{authenticated}) {
         if (Waiter::is_session_owner($userid,$$data{session_key})) {
             session_modify_page($$data{session_key});
         } else {
-            session_list_page('You cannot view that session.');
+            session_list_page('You cannot view that session.',$data);
         }
     } elsif ($$data{save}) {
         my @options = Waiter::WWW::prepare_session($data);
         if (Waiter::update_session(@options)) {
-            session_list_page("$$data{session_key} updated successfully.");
+            session_list_page(
+                "$$data{session_key} updated successfully.",$data);
         } else {
-            session_list_page("Session update failed.");
+            session_list_page("Session update failed.",$data);
         }
     } elsif ($$data{increase} or $$data{decrease}) {
         my $mod_time = Waiter::convert_to_seconds(
@@ -40,10 +41,11 @@ if ($$data{authenticated}) {
         }
         my $sessionid = Waiter::get_sessionid($$data{session_key});
         if (Waiter::update_end_time($sessionid,$mod_time)) {
-            session_list_page("$$data{session_key}: $direction time by $time");
+            session_list_page(
+                "$$data{session_key}: $direction time by $time",$data);
         }
     } else {
-        session_list_page();
+        session_list_page('',$data);
     }
 } else {
     # Non authenticated session, send to login page.
@@ -172,7 +174,8 @@ sub session_modify_page {
 }
 
 sub session_list_page {
-    my $error = shift || '';
+    my $error   = shift || '';
+    my $data    = shift;
 
     my $userid = Waiter::get_userid($$data{username});
     my @sessions = Waiter::get_user_sessions($userid);
