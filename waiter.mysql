@@ -19,7 +19,8 @@ create table users (
 );
 -- The system user; to send messages to users about activity, etc.
 insert into users (userid,user_key,username,password,display_name) values
-(0,'system','xyzzy','No Pass','system');
+(0,'xyzzy','system','No Pass','system');
+update users set userid=0 where username='system';
 
 create table recipes (
     recipeid        int unsigned not null auto_increment,
