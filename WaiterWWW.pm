@@ -3,12 +3,12 @@
 use strict;
 use warnings;
 
+package Waiter::WWW;
+
 use CGI qw/:standard/;
-use CGI::Carp qw/fatalsToBrowser/;
+use CGI::Carp qw/fatalsToBrowser warningsToBrowser/;
 use CGI::Session qw/-ip_match/;
 use POSIX qw(strftime);
-
-package Waiter::WWW;
 
 sub login {
     # Create the cookie and such.
@@ -17,7 +17,7 @@ sub login {
     if ($session->is_empty) {
         $session = $session->new() or die $session->errstr;
     }
-    $session->expire('~logged-in', '1w');
+    $session->expire('~logged-in', '+1w');
     $session->flush();
 
     my $cgi = CGI->new;
@@ -31,9 +31,50 @@ sub login {
     );
 }
 
+sub cgi_session_magic {
+    # Verify user session information and redirect to index.pl if invalid
+
+    my $cgi     = CGI->new();
+    # Create a new session, or load an existing session named 'CGISESSID'
+    my $session = CGI::Session->new();
+    # Push the cookie to browser
+    my $cookie = $cgi->cookie(
+        '-name'             => $session->name,
+        '-value'            => $session->id,
+        '-Cache-Control'    =>  'no-cache, no-store, must-revalidate'
+    );
+    print $session->header( -cookie => $cookie );
+
+    if ($session->param('~logged-in')) {
+        print STDERR "logged in\n";
+        # User is logged in, return all sorts of options and data
+        return read_params($session);
+    }
+    my $username = $cgi->param('username');
+    my $password = $cgi->param('password');
+    print STDERR "user: $username\n";
+    if ($username and $password) {
+        print STDERR "checking username / password\n";
+        # Delete the plain-text password
+        $session->clear('password');
+        $session->flush();
+        my $hash = Waiter::make_hash($username,$password);
+        if (Waiter::auth_user($username,$hash)) {
+            $session->param('username', $username);
+            $session->expire('~logged-in', '+1w');
+            $session->flush();
+            return read_params($session);
+        }
+    }
+    # Redirect to the index
+    print $session->header(-location => 'index.html');
+    return;
+}
+
 sub logout {
     my $session = shift;
 
+    $session->clear();
     $session->delete();
     $session->flush();
     print $session->header(
@@ -55,10 +96,6 @@ sub read_params {
     my $session = shift;
 
     my %data = ();
-    # Read session parameters
-    foreach my $key ($session->param()) {
-        $data{$key} = $session->param($key);
-    }
     # Read CGI parameters
     foreach my $key (CGI::param()) {
         $data{$key} = CGI::param($key);
@@ -69,23 +106,7 @@ sub read_params {
         $data{$key} = $ENV{$key};
     }
 
-    # Attempt to replace 'password' with 'hash'
-    if ($data{username} and $data{password}) {
-        $data{hash} = Waiter::make_hash($data{username},$data{password});
-        delete $data{password};
-    }
-
-    $data{authenticated} = 0;
-    if ($data{username} and $data{username} ne '' and
-        $data{hash} and $data{hash} ne '' and
-        Waiter::auth_user($data{username},$data{hash})) {
-        # Log user in
-        $data{authenticated} = 1;
-        $session->param('username', $data{username});
-        $session->param('hash', $data{hash});
-        $session->expire('~logged-in', '1w');
-    }
-    $session->flush();
+    $data{username} = $session->param('username');
 
     return \%data;
 }
@@ -199,9 +220,6 @@ sub page_header {
         |;
     }
     print <<ENDL;
-Content-Type: text/html; charset=ISO-8859-1
-Cache-Control: no-cache, no-store, must-revalidate
-
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
   <head>

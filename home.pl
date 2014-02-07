@@ -6,41 +6,33 @@ use warnings;
 use Waiter;
 use WaiterWWW;
 
-my $session = Waiter::WWW::load_session('Waiter');
-my $data = Waiter::WWW::read_params($session);
+my $data = Waiter::WWW::cgi_session_magic();
 
-if ($$data{authenticated}) {
-    my $info = '';
-    if ($$data{begin} and $$data{recipe_key} and $$data{recipe_key} ne '') {
-        my $userid = Waiter::get_userid($$data{username});
-        if (Waiter::get_sessionid_active($userid)) {
-            $info = 'You are already waiting.';
-        } else {
-            if (my $recipe = Waiter::get_recipe_by_key($$data{recipe_key})) {
-                if (Waiter::start_session($userid,$recipe)) {
-                    $info = "Begin Waiting using Recipe: $$data{recipe_key}";
-                } else {
-                    $info = 'Failed to start session!';
-                }
+my $info = '';
+if ($$data{begin} and $$data{recipe_key} and $$data{recipe_key} ne '') {
+    my $userid = Waiter::get_userid($$data{username});
+    if (Waiter::get_sessionid_active($userid)) {
+        $info = 'You are already waiting.';
+    } else {
+        if (my $recipe = Waiter::get_recipe_by_key($$data{recipe_key})) {
+            if (Waiter::start_session($userid,$recipe)) {
+                $info = "Begin Waiting using Recipe: $$data{recipe_key}";
             } else {
-                $info = "Recipe: $$data{recipe_key} not found.";
+                $info = 'Failed to start session!';
             }
-        }
-    } elsif ($$data{finish}) {
-        if (Waiter::finish_session($$data{sessionid})) {
-            $info = "Your session has been finished!";
         } else {
-            $info = "Hah, nice try.";
+            $info = "Recipe: $$data{recipe_key} not found.";
         }
     }
-    home_page($data,$info);
-} else {
-    # Non authenticated session, send to login page.
-    print $session->header(
-        -location   => 'index.pl'
-    );
+} elsif ($$data{finish}) {
+    if (Waiter::finish_session($$data{sessionid})) {
+        $info = "Your session has been finished!";
+    } else {
+        $info = "Hah, nice try.";
+    }
 }
 
+home_page($data,$info);
 exit;
 
 sub home_page {

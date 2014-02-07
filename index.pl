@@ -3,39 +3,17 @@
 use strict;
 use warnings;
 
-use Waiter;
 use WaiterWWW;
 
-my $session = Waiter::WWW::load_session('Waiter');
-my $data = Waiter::WWW::read_params($session);
-
-if ($session->is_expired) {
-    login_page('You have been logged out.');
-} elsif ($session->is_empty) {
-    if ($$data{action} and ($$data{action} eq 'login')) {
-        delete $$data{action};
-        if (Waiter::auth_user($$data{username},$$data{hash})) {
-            Waiter::WWW::login($session);
-        } else {
-            login_page('Invalid username or password.');
-        }
-    } else {
-        login_page();
-    }
-} elsif (Waiter::auth_user($$data{username},$$data{hash})) {
-    Waiter::WWW::login($session);
-} else {
-    Waiter::WWW::logout($session);
-}
-
+login_page();
 exit;
 
 sub login_page {
     my $error = shift || '';
 
-    Waiter::WWW::page_header('The Waiting Game Login Page',0);
+    Waiter::WWW::page_header('Welcome to The Waiting Game',0);
     print qq|
-    <form method='post'>
+    <form method='post' action='home.pl'>
       <table id='login'>
         <tr>
           <td>username:</td>
