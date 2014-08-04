@@ -72,6 +72,22 @@ sub auth_user {
     return;
 }
 
+sub get_user_by_username {
+    my $username    = shift;
+
+    my $sql = qq| select * from users where username = ? |;
+    my $dbh = db_connect();
+    my $sth = $dbh->prepare($sql);
+    $sth->execute($username);
+    my $user = $sth->fetchrow_hashref();
+    $sth->finish();
+    $dbh->disconnect();
+    if ($user) {
+        return $user;
+    }
+    return;
+}
+
 sub get_userid {
     # Return a user's userid using a username
     my $user    = shift;
