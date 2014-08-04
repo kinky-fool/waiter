@@ -229,7 +229,8 @@ sub get_user_recipes {
 sub get_user_sessions {
     # Return an array of session_keys owned by userid
     my $userid  = shift;
-    my $sql = qq| select session_key from sessions where trusteeid = ? |;
+    my $sql = qq| select session_key from sessions where trusteeid = ?
+                and finished = 0 |;
     my $dbh = db_connect();
     my $sth = $dbh->prepare($sql);
     $sth->execute($userid);
